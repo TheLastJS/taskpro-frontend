@@ -5,6 +5,8 @@ import PrivateRoute from './routes/PrivateRoute';
 import HomePage from './pages/HomePage/HomePage';
 import AuthPage from './pages/AuthPage/AuthPage';
 import WelcomePage from './pages/WelcomePage/WelcomePage';
+import LoginForm from './components/LoginForm/LoginForm';
+import RegisterForm from './components/RegisterForm/RegisterForm';
 
 function App() {
   return (
@@ -12,8 +14,8 @@ function App() {
       <Routes>
         <Route element={<PublicRoute restricted={true} />}>
           <Route path="/" element={<WelcomePage />} />
-          <Route path="auth/register" element={<AuthPage />} />
-          <Route path="auth/login" element={<AuthPage />} />
+          <Route path="auth/register" element={<RegisterForm />} />
+          <Route path="auth/login" element={<LoginForm />} />
         </Route>
 
         <Route element={<PrivateRoute />}>
