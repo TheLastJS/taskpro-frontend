@@ -21,7 +21,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<WelcomePage />} />
       </Routes>
     </div>
   );

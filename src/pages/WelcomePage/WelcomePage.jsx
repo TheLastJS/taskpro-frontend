@@ -7,9 +7,9 @@ function WelcomePage() {
     <div className={styles.backgroundLinear}>
       <div className={styles.container}>
         <div className={styles.wrapper}>
-          <img src='/welcome-image.png' alt='welcome-image' width='162' height="162"/>
+          <img src='../../assets/welcome-image.png' alt='welcome-image' width='162' height="162"/>
           <div className={styles.logo}>
-            <img src="/icon.svg" alt="icon" />
+            <img src="../../assets/icon.svg" alt="icon" />
             <p>Task Pro</p>
           </div>
           <p className={styles.welcomeText}>Supercharge your productivity and take control of your tasks with Task Pro - Don't wait, start achieving your goals now!</p>
