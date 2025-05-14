@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import './App.css';
 import PublicRoute from './routes/PublicRoute';
 import PrivateRoute from './routes/PrivateRoute';
@@ -13,15 +13,15 @@ function App() {
       <Routes>
         <Route element={<PublicRoute restricted={true} />}>
           <Route path="/" element={<WelcomePage />} />
-          <Route path="auth/register" element={<RegisterForm />} />
-          <Route path="auth/login" element={<LoginForm />} />
+          <Route path="/auth/register" element={<RegisterForm />} />
+          <Route path="/auth/login" element={<LoginForm />} />
         </Route>
 
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<HomePage />} />
         </Route>
 
-        <Route path="*" element={<WelcomePage />} />
+        <Route path="*" element={<NavLink to={<WelcomePage />} />} />
       </Routes>
     </div>
   );
