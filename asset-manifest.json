@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/taskpro-frontend/static/css/main.eec757f9.css",
-    "main.js": "/taskpro-frontend/static/js/main.328ef53b.js",
-    "static/media/welcome-image.png": "/taskpro-frontend/static/media/welcome-image.f771c78b4618e61b4a4a.png",
-    "static/media/icon.svg": "/taskpro-frontend/static/media/icon.bc6919d0bb5c3c295bc10183174b0b3b.svg",
-    "index.html": "/taskpro-frontend/index.html",
-    "main.eec757f9.css.map": "/taskpro-frontend/static/css/main.eec757f9.css.map",
-    "main.328ef53b.js.map": "/taskpro-frontend/static/js/main.328ef53b.js.map"
+    "main.css": "/static/css/main.eec757f9.css",
+    "main.js": "/static/js/main.1caae0be.js",
+    "static/media/welcome-image.png": "/static/media/welcome-image.f771c78b4618e61b4a4a.png",
+    "static/media/icon.svg": "/static/media/icon.bc6919d0bb5c3c295bc10183174b0b3b.svg",
+    "index.html": "/index.html",
+    "main.eec757f9.css.map": "/static/css/main.eec757f9.css.map",
+    "main.1caae0be.js.map": "/static/js/main.1caae0be.js.map"
   },
   "entrypoints": [
     "static/css/main.eec757f9.css",
-    "static/js/main.328ef53b.js"
+    "static/js/main.1caae0be.js"
   ]
 }
