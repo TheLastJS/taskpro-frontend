@@ -1,0 +1,113 @@
+/* Mobile First */
+.background {
+  background: linear-gradient(
+    180deg,
+    rgba(196, 196, 196, 0) 25%,
+    #bedbb0 92.19%
+  );
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.registerForm {
+  border-radius: 8px;
+  background-color: #151515;
+  padding-left: 24px;
+}
+.navigate {
+  display: flex;
+  align-items: start;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.activeTab {
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.inactiveTab {
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.3);
+}
+.formArea {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 40px;
+  margin-right: 24px;
+}
+.inputArea {
+  border: 1px solid #bedbb0;
+  border-radius: 8px;
+  width: 287px;
+  height: 49px;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  box-shadow: 0 4px 16px 0 rgba(22, 22, 22, 0.08);
+  background: #1f1f1f;
+  padding-left: 18px;
+  opacity: 0.4;
+  color: #fff;
+}
+.errorMessage {
+  color: #ff0000;
+  font-size: 12px;
+}
+
+.submitBtn {
+  border-radius: 8px;
+  margin-bottom: 24px;
+  width: 287px;
+  height: 49px;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: #161616;
+  background: #bedbb0;
+}
+
+.inputArea::placeholder {
+  color: #fff;
+  opacity: 0.4;
+}
+.inputArea:focus {
+  outline: none;
+  border: 2px solid #bedbb0;
+  box-shadow: 0 4px 16px 0 rgba(31, 30, 30, 0.08);
+}
+
+.passwordWrapper {
+  position: relative;
+}
+
+.eyeIcon {
+  position: absolute;
+  top: 55%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #fff;
+  opacity: 0.4;
+}
+/* TABLET */
+@media only screen and (max-width: 767.98px) {
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279.98px) {
+}
+
+/* DESKTOP */
+@media only screen and (min-width: 1280px) {
+}
