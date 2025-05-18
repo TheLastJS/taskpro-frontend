@@ -1,0 +1,31 @@
+.logo {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    margin-top: 24px;
+}
+
+.logo p {
+    font-family: Poppins;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: -4%;
+    color: white;
+    
+}
+
+.boardContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-right: 24px;
+
+}
+
+.boardContainer p {
+    font-family: Poppins;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: -2%;
+}

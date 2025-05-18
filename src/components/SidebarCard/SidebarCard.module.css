@@ -1,0 +1,27 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 206px;
+    background-color: rgba(31, 31, 31, 1);
+    margin-right: 24px;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.container p {
+    font-family: Poppins;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: -2%;
+}
+
+.container span {
+    color: rgba(190, 219, 176, 1);
+
+}
+
+.cardFooter {
+    display: flex;
+    gap: 8px;
+}
