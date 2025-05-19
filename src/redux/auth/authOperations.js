@@ -1,4 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 
 
@@ -30,11 +31,14 @@ export const registerThunk = createAsyncThunk(
 export const loginThunk = createAsyncThunk(
   "auth/login",
   async (credentials, thunkAPI) => {
-    // -Kullanıcı girişi için gerekli fonksiyon...
     try {
-      
+      const response = await axios.post("/auth/login", credentials);
+      console.log("LOGIN RESPONSE:", response.data);
+      const token = response.data?.data?.accessToken;
+      if (!token) throw new Error("Token alınamadı!");
+      return { token };
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -43,17 +47,11 @@ export const logoutThunk = createAsyncThunk(
   "auth/logout",
   async (_, thunkAPI) => {
     try {
-      
-
-      // LocalStorage'dan token sil
-
-      // Başarılıysa veriyi döndür
-      
+      await axios.post("/auth/logout");
+      localStorage.removeItem("persist:auth");
+      return true;
     } catch (error) {
-
       console.error("logoutThunk hata:", error);
-
-      // Hata mesajını yakala ve redux'a gönder
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || error.message
       );

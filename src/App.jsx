@@ -20,6 +20,7 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
         </Route>
 
         <Route path="/auth/:type" element={<AuthPage />} />

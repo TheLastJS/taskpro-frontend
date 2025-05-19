@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import styles from "./RegisterForm.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Formik } from "formik";
 import { userRegisterSchema } from "../../schemas/userRegisterSchema";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { loginThunk } from "../../redux/auth/authOperations";
 
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -35,8 +40,14 @@ function RegisterForm() {
         <Formik
           initialValues={{ name: "", email: "", password: "" }}
           validationSchema={userRegisterSchema}
-          onSubmit={(values, { resetForm }) => {
-            console.log("Form values:", values);
+          onSubmit={async (values, { resetForm }) => {
+            try {
+              await axios.post("/auth/register", values);
+              await dispatch(loginThunk({ email: values.email, password: values.password })).unwrap();
+              navigate("/home");
+            } catch (err) {
+              alert("Kayıt başarısız: " + (err.response?.data?.message || err.message));
+            }
             resetForm();
           }}
         >
@@ -52,6 +63,7 @@ function RegisterForm() {
                 type="name"
                 name="name"
                 placeholder="Enter your name"
+                autoFocus
               />
               <ErrorMessage
                 name="email"
