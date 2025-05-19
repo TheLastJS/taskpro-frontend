@@ -9,8 +9,71 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { setUser } from "../../redux/auth/authSlice";
 import HelpModal from "../../components/HelpModal";
+import { Select, MenuItem, InputLabel, FormControl, Box } from '@mui/material';
+import styled from 'styled-components';
 
-function HomePage() {
+const Layout = styled.div`
+  display: flex;
+  min-height: 100vh;
+  background: ${({ theme }) => theme.background};
+`;
+const Sidebar = styled.aside`
+  width: 260px;
+  background: ${({ theme }) => theme.sidebar};
+  color: ${({ theme }) => theme.text};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+`;
+const Header = styled.header`
+  height: 64px;
+  background: ${({ theme }) => theme.header};
+  color: ${({ theme }) => theme.text};
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 32px;
+`;
+const Card = styled.div`
+  background: ${({ theme }) => theme.helpCard};
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 24px;
+  width: 200px;
+  color: ${({ theme }) => theme.text};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+`;
+const Main = styled.main`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const BoardButton = styled.button`
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: ${({ theme }) => theme.accent};
+  color: #151515;
+  border: none;
+  margin-bottom: 16px;
+  font-weight: 500;
+`;
+const LogoutButton = styled.button`
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.text};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+function HomePage({ setTheme, theme }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const dispatch = useDispatch();
@@ -34,71 +97,109 @@ function HomePage() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#1F1F1F" }}>
+    <Layout>
       {/* Sidebar */}
-      <aside style={{ width: 260, background: "#121212", color: "#fff", display: "flex", flexDirection: "column", alignItems: "center", padding: 24 }}>
+      <Sidebar>
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 24, marginBottom: 32 }}>
           <img src={icon} alt="TaskPro Icon" style={{ width: 32, height: 32 }} />
           Task Pro
         </div>
         <div style={{ flex: 1, width: "100%" }}>
-          <button style={{ width: "100%", padding: 12, borderRadius: 8, background: "#bedbb0", color: "#151515", border: "none", marginBottom: 16, fontWeight: 500 }}>
+          <BoardButton>
             + Create a new board
-          </button>
+          </BoardButton>
           {/* Board listesi burada olacak */}
         </div>
         {/* Help Card */}
-        <div style={{
-          background: "#1F1F1F",
-          borderRadius: 16,
-          padding: 20,
-          marginTop: 24,
-          width: 200,
-          color: "#fff",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
-        }}>
+        <Card>
           <img src={helpImage} alt="Help" style={{ marginBottom: 8 }} />
           <div style={{ fontSize: 15, textAlign: "center", marginBottom: 12 }}>
             If you need help with <span style={{ color: "#BEDBB0" }}>TaskPro</span>, check out our support resources or reach out to our customer support team.
           </div>
           <button style={{
             background: "none",
-            border: "1px solid #BEDBB0",
-            color: "#BEDBB0",
+            border: `1px solid ${theme === 'violet' ? '#5255BC' : '#BEDBB0'}`,
+            color: theme === 'violet' ? '#5255BC' : '#BEDBB0',
             borderRadius: 8,
             padding: "6px 16px",
             fontWeight: 500,
             cursor: "pointer",
             fontSize: 14
           }} onClick={() => setHelpOpen(true)}>Need help?</button>
-        </div>
+        </Card>
         <div style={{ marginTop: 32, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-          <button style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }} onClick={handleLogout}>
-            <LogoutIcon style={{ fontSize: 22, color: "rgb(190, 219, 176)" }} /> Log out
-          </button>
+          <LogoutButton onClick={handleLogout}>
+            <LogoutIcon style={{ fontSize: 22, color: theme === 'violet' ? '#FFFFFF' : '#BEDBB0' }} /> Log out
+          </LogoutButton>
         </div>
-      </aside>
+      </Sidebar>
       {/* Main Content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {/* Header */}
-        <header style={{ height: 64, background: "#121212", color: "#fff", display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 32px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <Header>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <FormControl variant="outlined" size="small" sx={{ minWidth: 120, mr: 2 }}>
+              <InputLabel
+                id="theme-select-label"
+                sx={{
+                  color: theme === 'dark' ? '#fff' : '#000',
+                  '&.Mui-focused': {
+                    color: theme === 'dark' ? '#fff' : '#000',
+                  },
+                  '&.MuiInputLabel-shrink': {
+                    color: theme === 'dark' ? '#fff' : '#000',
+                  },
+                }}
+              >Theme</InputLabel>
+              <Select
+                labelId="theme-select-label"
+                id="theme-select"
+                value={theme}
+                label="Theme"
+                onChange={e => setTheme(e.target.value)}
+                sx={{
+                  color: theme === 'light' ? '#161616' : (theme === 'dark' ? '#fff' : '#000'),
+                  background: theme === 'violet' ? '#D6D8FF' : (theme === 'light' ? '#fff' : '#232323'),
+                  borderRadius: 2,
+                  '.MuiOutlinedInput-notchedOutline': { borderColor: theme === 'violet' ? '#5255BC' : '#bedbb0' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: theme === 'violet' ? '#5255BC' : '#bedbb0' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: theme === 'violet' ? '#5255BC' : '#bedbb0' },
+                  '.MuiSvgIcon-root': { color: theme === 'violet' ? '#5255BC' : '#bedbb0' },
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      bgcolor: theme === 'violet' ? '#ECEDFD' : (theme === 'light' ? '#fff' : '#232323'),
+                      color: theme === 'light' ? '#161616' : (theme === 'dark' ? '#fff' : '#000'),
+                      borderRadius: 2,
+                      boxShadow: 3,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="light">Light</MenuItem>
+                <MenuItem value="dark">Dark</MenuItem>
+                <MenuItem value="violet">Violet</MenuItem>
+              </Select>
+            </FormControl>
+            {user && user.name && (
+              <span style={{ fontWeight: 600, fontSize: 18, marginRight: 12, color: theme === 'light' ? '#161616' : '#fff', maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {user.name}
+              </span>
+            )}
             <span
               style={{
                 cursor: "pointer",
                 borderRadius: "50%",
                 overflow: "hidden",
-                border: "2px solid #bedbb0",
+                border: `2px solid ${theme === 'violet' ? '#5255BC' : '#bedbb0'}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 width: 40,
                 height: 40,
-                background: "#bedbb0",
-                color: "#151515",
+                background: theme === 'violet' ? '#ECEDFD' : '#bedbb0',
+                color: theme === 'violet' ? '#5255BC' : '#151515',
                 fontWeight: 700,
                 fontSize: 20,
                 textAlign: "center",
@@ -112,19 +213,19 @@ function HomePage() {
                 user && user.name ? user.name[0].toUpperCase() : "?"
               )}
             </span>
-          </div>
-        </header>
+          </Box>
+        </Header>
         {/* Main area */}
-        <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ color: "#bdbdbd", fontSize: 20, textAlign: "center", maxWidth: 600 }}>
-            Before starting your project, it is essential to <span style={{ color: "#bedbb0" }}>create a board</span> to visualize and track all the necessary tasks and milestones. This board serves as a powerful tool to organize the workflow and ensure effective collaboration among team members.
+        <Main>
+          <div style={{ color: theme === 'dark' ? '#bdbdbd' : '#161616', fontSize: 20, textAlign: "center", maxWidth: 600 }}>
+            Before starting your project, it is essential to <span style={{ color: theme === 'violet' ? '#5255BC' : '#bedbb0' }}>create a board</span> to visualize and track all the necessary tasks and milestones. This board serves as a powerful tool to organize the workflow and ensure effective collaboration among team members.
           </div>
-        </main>
+        </Main>
       </div>
       {/* UserInfo Modal */}
       {profileOpen && <UserInfo onClose={() => setProfileOpen(false)} />}
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
-    </div>
+    </Layout>
   );
 }
 

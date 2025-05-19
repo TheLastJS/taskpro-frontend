@@ -8,7 +8,7 @@ import LoginForm from './components/LoginForm/LoginForm';
 import RegisterForm from './components/RegisterForm/RegisterForm';
 import AuthPage from './pages/AuthPage/AuthPage';
 
-function App() {
+function App({ setTheme, theme }) {
   return (
      <div>
       <Routes>
@@ -19,8 +19,8 @@ function App() {
         </Route>
 
         <Route element={<PrivateRoute />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<HomePage setTheme={setTheme} theme={theme} />} />
+          <Route path="/home" element={<HomePage setTheme={setTheme} theme={theme} />} />
         </Route>
 
         <Route path="/auth/:type" element={<AuthPage />} />
