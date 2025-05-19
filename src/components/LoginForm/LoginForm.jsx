@@ -1,12 +1,17 @@
 import { ErrorMessage, Field, Formik } from "formik";
 import React, { useState } from "react";
 import styles from "./LoginForm.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { userLoginSchema } from "../../schemas/userLoginSchema";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { loginThunk } from "../../redux/auth/authOperations";
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -37,8 +42,13 @@ function LoginForm() {
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={userLoginSchema}
-          onSubmit={(values, { resetForm }) => {
-            console.log("Form values:", values);
+          onSubmit={async (values, { resetForm }) => {
+            try {
+              await dispatch(loginThunk(values)).unwrap();
+              navigate("/home");
+            } catch (err) {
+              alert("Giriş başarısız: " + (err.message || "Hata"));
+            }
             resetForm();
           }}
         >
@@ -54,6 +64,7 @@ function LoginForm() {
                 type="email"
                 name="email"
                 placeholder="Enter your email"
+                autoFocus
               />
               <ErrorMessage
                 name="password"

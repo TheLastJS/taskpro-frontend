@@ -1,40 +1,26 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-
-
-
+import { authService } from "../../services/authService";
 
 export const registerThunk = createAsyncThunk(
   "auth/register",
   async (credentials, thunkAPI) => {
     try {
-
-
-        return {
-            ...thunkAPI,
-        }
-
+      const data = await authService.register(credentials);
+      return data;
     } catch (error) {
-      // API'den gelen spesifik hata mesajını kontrol et
-        if (error.response?.status === 409) {
-            return thunkAPI.rejectWithValue("This email is already registered");
-        }
-      // Diğer hata durumları için
-        return thunkAPI.rejectWithValue(
-            error.response?.data?.message || error.message || "Registration failed"
-      );
+      return thunkAPI.rejectWithValue(error.message || "Registration failed");
     }
   }
-)
-
+);
 
 export const loginThunk = createAsyncThunk(
   "auth/login",
   async (credentials, thunkAPI) => {
-    // -Kullanıcı girişi için gerekli fonksiyon...
     try {
-      
+      const data = await authService.login(credentials);
+      return data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.message || "Login failed");
     }
   }
 );
@@ -43,20 +29,10 @@ export const logoutThunk = createAsyncThunk(
   "auth/logout",
   async (_, thunkAPI) => {
     try {
-      
-
-      // LocalStorage'dan token sil
-
-      // Başarılıysa veriyi döndür
-      
+      await authService.logout();
+      return true;
     } catch (error) {
-
-      console.error("logoutThunk hata:", error);
-
-      // Hata mesajını yakala ve redux'a gönder
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || error.message
-      );
+      return thunkAPI.rejectWithValue(error.message || "Logout failed");
     }
   }
 );
@@ -64,17 +40,11 @@ export const logoutThunk = createAsyncThunk(
 export const refreshThunk = createAsyncThunk(
   "auth/refresh",
   async (_, thunkAPI) => {
-    const savedToken = thunkAPI.getState().auth.token;
-    if (savedToken) {
-      
-    } else {
-      return thunkAPI.rejectWithValue("Token doesn't exist");
-    }
-
     try {
-      
+      const data = await authService.getCurrentUser();
+      return data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.message || "Refresh failed");
     }
   }
 );

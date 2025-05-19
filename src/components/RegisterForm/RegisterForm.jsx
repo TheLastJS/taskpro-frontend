@@ -1,16 +1,21 @@
 import React, { useState } from "react";
 import styles from "./RegisterForm.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Formik } from "formik";
 import { userRegisterSchema } from "../../schemas/userRegisterSchema";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { registerThunk } from "../../redux/auth/authOperations";
 
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
+
   return (
     <div className={styles.background}>
       <div className={styles.registerForm}>
@@ -35,12 +40,19 @@ function RegisterForm() {
         <Formik
           initialValues={{ name: "", email: "", password: "" }}
           validationSchema={userRegisterSchema}
-          onSubmit={(values, { resetForm }) => {
-            console.log("Form values:", values);
-            resetForm();
+          onSubmit={async (values, { resetForm, setSubmitting }) => {
+            try {
+              await dispatch(registerThunk(values)).unwrap();
+              navigate("/home");
+            } catch (err) {
+              alert("Kayıt başarısız: " + err);
+            } finally {
+              setSubmitting(false);
+              resetForm();
+            }
           }}
         >
-          {({ handleSubmit }) => (
+          {({ handleSubmit, isSubmitting }) => (
             <form className={styles.formArea} onSubmit={handleSubmit}>
               <ErrorMessage
                 name="name"
@@ -49,9 +61,10 @@ function RegisterForm() {
               />
               <Field
                 className={styles.inputArea}
-                type="name"
+                type="text"
                 name="name"
                 placeholder="Enter your name"
+                autoFocus
               />
               <ErrorMessage
                 name="email"
@@ -91,8 +104,12 @@ function RegisterForm() {
                   </div>
                 )}
               </Field>
-              <button className={styles.submitBtn} type="submit">
-                Register Now
+              <button 
+                className={styles.submitBtn} 
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Registering..." : "Register Now"}
               </button>
             </form>
           )}

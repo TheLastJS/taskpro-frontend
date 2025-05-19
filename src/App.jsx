@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage/HomePage';
 import WelcomePage from './pages/WelcomePage/WelcomePage';
 import LoginForm from './components/LoginForm/LoginForm';
 import RegisterForm from './components/RegisterForm/RegisterForm';
+import AuthPage from './pages/AuthPage/AuthPage';
 
 function App() {
   return (
@@ -19,9 +20,12 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
         </Route>
 
-        <Route path="*" element={<NavLink to={<WelcomePage />} />} />
+        <Route path="/auth/:type" element={<AuthPage />} />
+
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   );
