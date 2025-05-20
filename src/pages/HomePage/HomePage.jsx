@@ -11,6 +11,11 @@ import { setUser } from "../../redux/auth/authSlice";
 import HelpModal from "../../components/HelpModal";
 import { Select, MenuItem, InputLabel, FormControl, Box } from '@mui/material';
 import styled from 'styled-components';
+import BoardModal from '../../components/BoardModal';
+import SidebarBoardList from '../../components/Sidebar';
+import BoardDetail from '../../components/BoardDetail';
+import { selectSelectedBoard } from '../../redux/board/boardSelectors';
+import { backgroundTypes } from '../../components/BoardModal';
 
 const Layout = styled.div`
   display: flex;
@@ -76,10 +81,12 @@ const LogoutButton = styled.button`
 function HomePage({ setTheme, theme }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [isBoardModalOpen, setBoardModalOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(state => state.auth.user);
   const token = useSelector(state => state.auth.token);
+  const selectedBoard = useSelector(selectSelectedBoard);
 
   useEffect(() => {
     if (token && (!user || !user.name)) {
@@ -96,6 +103,13 @@ function HomePage({ setTheme, theme }) {
     navigate("/auth/login");
   };
 
+  // Board background görselini bul
+  let boardBgImg = undefined;
+  if (selectedBoard) {
+    const bgObj = backgroundTypes.find(bg => bg.name === selectedBoard.background);
+    boardBgImg = bgObj ? bgObj.img : undefined;
+  }
+
   return (
     <Layout>
       {/* Sidebar */}
@@ -105,10 +119,7 @@ function HomePage({ setTheme, theme }) {
           Task Pro
         </div>
         <div style={{ flex: 1, width: "100%" }}>
-          <BoardButton>
-            + Create a new board
-          </BoardButton>
-          {/* Board listesi burada olacak */}
+          <SidebarBoardList onCreateBoard={() => setBoardModalOpen(true)} />
         </div>
         {/* Help Card */}
         <Card>
@@ -216,15 +227,25 @@ function HomePage({ setTheme, theme }) {
           </Box>
         </Header>
         {/* Main area */}
-        <Main>
-          <div style={{ color: theme === 'dark' ? '#bdbdbd' : '#161616', fontSize: 20, textAlign: "center", maxWidth: 600 }}>
-            Before starting your project, it is essential to <span style={{ color: theme === 'violet' ? '#5255BC' : '#bedbb0' }}>create a board</span> to visualize and track all the necessary tasks and milestones. This board serves as a powerful tool to organize the workflow and ensure effective collaboration among team members.
-          </div>
+        <Main style={boardBgImg ? {
+          background: `url(${boardBgImg}) center center / cover no-repeat`,
+          minHeight: 'calc(100vh - 64px)',
+          transition: 'background 0.3s',
+        } : {}}>
+          {selectedBoard ? (
+            <BoardDetail board={selectedBoard} />
+          ) : (
+            <div style={{ color: theme === 'dark' ? '#bdbdbd' : '#161616', fontSize: 20, textAlign: "center", maxWidth: 600 }}>
+              Before starting your project, it is essential to <span style={{ color: theme === 'violet' ? '#5255BC' : '#bedbb0' }}>create a board</span> to visualize and track all the necessary tasks and milestones. This board serves as a powerful tool to organize the workflow and ensure effective collaboration among team members.
+            </div>
+          )}
         </Main>
       </div>
       {/* UserInfo Modal */}
       {profileOpen && <UserInfo onClose={() => setProfileOpen(false)} />}
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+      {/* Board Ekleme Modalı */}
+      <BoardModal open={isBoardModalOpen} onClose={() => setBoardModalOpen(false)} />
     </Layout>
   );
 }
