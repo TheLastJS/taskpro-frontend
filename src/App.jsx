@@ -1,4 +1,4 @@
-import { Navigate, NavLink, Route, Routes, BrowserRouter } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import "./App.css";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
@@ -13,27 +13,26 @@ function App({ setTheme, theme }) {
   return (
     <div>
       <ToastContainer position="top-right" autoClose={3000} />
-      <BrowserRouter basename="/taskpro-frontend">
-        <Routes>
-          <Route element={<PublicRoute restricted={true} />}>
-            <Route path="/" element={<WelcomePage />} />
-            <Route path="/auth/register" element={<RegisterForm />} />
-            <Route path="/auth/login" element={<LoginForm />} />
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<PublicRoute restricted={true} />}>
+          <Route path="/taskpro-frontend" element={<WelcomePage />} />
+          <Route path="/taskpro-frontend/welcome" element={<WelcomePage />} />
+          <Route path="/taskpro-frontend/auth">
+            <Route path="login" element={<LoginForm />} />
+            <Route path="register" element={<RegisterForm />} />
+            <Route path=":type" element={<AuthPage />} />
           </Route>
-          <Route element={<PrivateRoute />}>
-            <Route
-              path="/"
-              element={<HomePage setTheme={setTheme} theme={theme} />}
-            />
-            <Route
-              path="/home"
-              element={<HomePage setTheme={setTheme} theme={theme} />}
-            />
-          </Route>
-          <Route path="/auth/:type" element={<AuthPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
+        </Route>
+
+        {/* Private Routes */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/taskpro-frontend/home" element={<HomePage setTheme={setTheme} theme={theme} />} />
+        </Route>
+
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/taskpro-frontend/welcome" />} />
+      </Routes>
     </div>
   );
 }
