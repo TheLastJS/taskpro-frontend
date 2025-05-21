@@ -1,19 +1,19 @@
-import axios from 'axios';
+import axios from "axios";
 
-export const BASE_URL = "https://taskspro-backend.onrender.com";
+export const BASE_URL = "http://localhost:3000";
 
 const instance = axios.create({
   baseURL: BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 // Request interceptor
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,11 +29,11 @@ instance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/auth/login';
+      localStorage.removeItem("token");
+      window.location.href = "/auth/login";
     }
     return Promise.reject(error);
   }
 );
 
-export default instance; 
+export default instance;
