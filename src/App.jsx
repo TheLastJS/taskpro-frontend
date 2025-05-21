@@ -16,22 +16,19 @@ function App({ setTheme, theme }) {
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicRoute restricted={true} />}>
-          <Route path="/taskpro-frontend" element={<WelcomePage />} />
-          <Route path="/taskpro-frontend/welcome" element={<WelcomePage />} />
-          <Route path="/taskpro-frontend/auth">
-            <Route path="login" element={<LoginForm />} />
-            <Route path="register" element={<RegisterForm />} />
-            <Route path=":type" element={<AuthPage />} />
-          </Route>
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
         </Route>
 
         {/* Private Routes */}
         <Route element={<PrivateRoute />}>
-          <Route path="/taskpro-frontend/home" element={<HomePage setTheme={setTheme} theme={theme} />} />
+          <Route path="/home" element={<HomePage setTheme={setTheme} theme={theme} />} />
         </Route>
 
         {/* Fallback Route */}
-        <Route path="*" element={<Navigate to="/taskpro-frontend/welcome" />} />
+        <Route path="*" element={<Navigate to="/welcome" />} />
       </Routes>
     </div>
   );

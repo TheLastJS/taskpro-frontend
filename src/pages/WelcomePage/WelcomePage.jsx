@@ -26,12 +26,12 @@ function WelcomePage() {
         </div>
 
         <div className={styles.button}>
-          <NavLink to="/auth/register">
+          <NavLink to="/register">
             <button className={styles.buttonRegister}>
               <p>Registration</p>
             </button>
           </NavLink>
-          <NavLink to="/auth/login">
+          <NavLink to="/login">
             <button className={styles.buttonLogin}>Log In</button>
           </NavLink>
         </div>
