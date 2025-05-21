@@ -4,9 +4,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Formik } from "formik";
 import { userRegisterSchema } from "../../schemas/userRegisterSchema";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import axios from "axios";
 import { useDispatch } from "react-redux";
-import { loginThunk } from "../../redux/auth/authOperations";
+import { registerThunk } from "../../redux/auth/authOperations";
 
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +15,7 @@ function RegisterForm() {
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
+
   return (
     <div className={styles.background}>
       <div className={styles.registerForm}>
@@ -40,18 +40,19 @@ function RegisterForm() {
         <Formik
           initialValues={{ name: "", email: "", password: "" }}
           validationSchema={userRegisterSchema}
-          onSubmit={async (values, { resetForm }) => {
+          onSubmit={async (values, { resetForm, setSubmitting }) => {
             try {
-              await axios.post("/auth/register", values);
-              await dispatch(loginThunk({ email: values.email, password: values.password })).unwrap();
+              await dispatch(registerThunk(values)).unwrap();
               navigate("/home");
             } catch (err) {
-              alert("Kayıt başarısız: " + (err.response?.data?.message || err.message));
+              alert("Kayıt başarısız: " + err);
+            } finally {
+              setSubmitting(false);
+              resetForm();
             }
-            resetForm();
           }}
         >
-          {({ handleSubmit }) => (
+          {({ handleSubmit, isSubmitting }) => (
             <form className={styles.formArea} onSubmit={handleSubmit}>
               <ErrorMessage
                 name="name"
@@ -60,7 +61,7 @@ function RegisterForm() {
               />
               <Field
                 className={styles.inputArea}
-                type="name"
+                type="text"
                 name="name"
                 placeholder="Enter your name"
                 autoFocus
@@ -103,8 +104,12 @@ function RegisterForm() {
                   </div>
                 )}
               </Field>
-              <button className={styles.submitBtn} type="submit">
-                Register Now
+              <button 
+                className={styles.submitBtn} 
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Registering..." : "Register Now"}
               </button>
             </form>
           )}
