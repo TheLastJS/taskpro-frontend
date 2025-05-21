@@ -7,10 +7,12 @@ import WelcomePage from "./pages/WelcomePage/WelcomePage";
 import LoginForm from "./components/LoginForm/LoginForm";
 import RegisterForm from "./components/RegisterForm/RegisterForm";
 import AuthPage from "./pages/AuthPage/AuthPage";
+import { ToastContainer } from 'react-toastify';
 
 function App({ setTheme, theme }) {
   return (
     <div>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route element={<PublicRoute restricted={true} />}>
           <Route path="/" element={<WelcomePage />} />

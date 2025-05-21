@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createBoardThunk } from '../redux/board/boardOperations';
 import { selectBoardsLoading } from '../redux/board/boardSelectors';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // ICONLAR
 import starIcon from '../assets/icons/star-04.svg';
 import loadingIcon from '../assets/icons/loading-03.svg';
@@ -37,6 +39,7 @@ const iconTypes = [
   { name: 'icon-hexagon', icon: hexagonIcon },
 ];
 export const backgroundTypes = [
+  { name: '', img: null },
   { name: '00', img: bg1 },
   { name: '01', img: bg2 },
   { name: '02', img: bg3 },
@@ -66,11 +69,22 @@ const BoardModal = ({ open, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    const result = await dispatch(createBoardThunk({ title, icon, background })).unwrap();
-    if (result && onClose) onClose();
-    setTitle('');
-    setIcon(iconTypes[0].name);
-    setBackground(backgroundTypes[0].name);
+    const boardData = { title, icon };
+    if (background !== '') boardData.background = background;
+    try {
+      const result = await dispatch(createBoardThunk(boardData)).unwrap();
+      if (result && onClose) onClose();
+      setTitle('');
+      setIcon(iconTypes[0].name);
+      setBackground(backgroundTypes[0].name);
+    } catch (err) {
+      console.log('Board create error:', err?.message);
+      if (err?.message && err.message.toLowerCase().includes('already exists')) {
+        toast.error('Board name is already existed');
+      } else {
+        toast.error(err?.message || 'Board could not be created!');
+      }
+    }
   };
 
   return (
@@ -115,22 +129,65 @@ const BoardModal = ({ open, onClose }) => {
           </div>
           <div style={{ marginBottom: 16 }}>
             <div style={{ marginBottom: 4 }}>Background</div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {backgroundTypes.map(bg => (
-                <img
-                  key={bg.name}
-                  src={bg.img}
-                  alt={bg.name}
-                  onClick={() => setBackground(bg.name)}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    objectFit: 'cover',
-                    borderRadius: 6,
-                    border: background === bg.name ? '2px solid #bedbb0' : '2px solid transparent',
-                    cursor: 'pointer',
-                  }}
-                />
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', marginBottom: 8 }}>
+              {backgroundTypes.slice(0, 8).map(bg => (
+                bg.img ? (
+                  <img
+                    key={bg.name || 'none'}
+                    src={bg.img}
+                    alt={bg.name}
+                    onClick={() => setBackground(bg.name)}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      objectFit: 'cover',
+                      borderRadius: 6,
+                      border: background === bg.name ? '2px solid #bedbb0' : '2px solid transparent',
+                      cursor: 'pointer',
+                    }}
+                  />
+                ) : (
+                  <div
+                    key="none"
+                    onClick={() => setBackground('')}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 6,
+                      border: background === '' ? '2px solid #bedbb0' : '2px solid #444',
+                      background: '#232323',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#888',
+                      fontSize: 22,
+                      cursor: 'pointer',
+                    }}
+                    title="No background"
+                  >
+                    <span style={{fontSize: 22}}>&times;</span>
+                  </div>
+                )
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'nowrap' }}>
+              {backgroundTypes.slice(8, 16).map(bg => (
+                bg.img ? (
+                  <img
+                    key={bg.name}
+                    src={bg.img}
+                    alt={bg.name}
+                    onClick={() => setBackground(bg.name)}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      objectFit: 'cover',
+                      borderRadius: 6,
+                      border: background === bg.name ? '2px solid #bedbb0' : '2px solid transparent',
+                      cursor: 'pointer',
+                    }}
+                  />
+                ) : null
               ))}
             </div>
           </div>
