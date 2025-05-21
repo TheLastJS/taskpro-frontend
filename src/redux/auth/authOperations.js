@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-
 import axios from "../axiosInstance";
+import { authService } from "../../services/authService";
 
 axios.defaults.baseURL = "http://localhost:3000";
 
