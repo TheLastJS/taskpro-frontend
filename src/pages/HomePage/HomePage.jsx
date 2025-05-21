@@ -13,7 +13,7 @@ import HelpModal from "../../components/HelpModal";
 import { Select, MenuItem, InputLabel, FormControl, Box } from "@mui/material";
 import styled from "styled-components";
 import BoardModal from "../../components/BoardModal";
-import SidebarBoardList from "../../components/Sidebar";
+import Sidebar from "../../components/Sidebar";
 import BoardDetail from "../../components/BoardDetail";
 import { selectSelectedBoard } from "../../redux/board/boardSelectors";
 import { backgroundTypes } from "../../components/BoardModal";
@@ -23,7 +23,7 @@ const Layout = styled.div`
   min-height: 100vh;
   background: ${({ theme }) => theme.background};
 `;
-const Sidebar = styled.aside`
+const SidebarContainer = styled.aside`
   width: 260px;
   background: ${({ theme }) => theme.sidebar};
   color: ${({ theme }) => theme.text};
@@ -40,6 +40,9 @@ const Header = styled.header`
   align-items: center;
   justify-content: flex-end;
   padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
 `;
 const Card = styled.div`
   background: ${({ theme }) => theme.helpCard};
@@ -56,8 +59,11 @@ const Card = styled.div`
 const Main = styled.main`
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
 `;
 const MainContent = styled.main`
   flex: 1;
@@ -124,74 +130,16 @@ function HomePage({ setTheme, theme }) {
   return (
     <Layout>
       {/* Sidebar */}
-      <Sidebar>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontWeight: 700,
-            fontSize: 24,
-            marginBottom: 32,
-          }}
-        >
-          <img
-            src={icon}
-            alt="TaskPro Icon"
-            style={{ width: 32, height: 32 }}
-          />
-          Task Pro
-        </div>
-        <div style={{ flex: 1, width: "100%" }}>
-          <SidebarBoardList onCreateBoard={() => setBoardModalOpen(true)} />
-        </div>
-        {/* Help Card */}
-        <Card>
-          <img src={helpImage} alt="Help" style={{ marginBottom: 8 }} />
-          <div style={{ fontSize: 15, textAlign: "center", marginBottom: 12 }}>
-            If you need help with{" "}
-            <span style={{ color: "#BEDBB0" }}>TaskPro</span>, check out our
-            support resources or reach out to our customer support team.
-          </div>
-          <button
-            style={{
-              background: "none",
-              border: `1px solid ${theme === "violet" ? "#5255BC" : "#BEDBB0"}`,
-              color: theme === "violet" ? "#5255BC" : "#BEDBB0",
-              borderRadius: 8,
-              padding: "6px 16px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontSize: 14,
-            }}
-            onClick={() => setHelpOpen(true)}
-          >
-            Need help?
-          </button>
-        </Card>
-        <div
-          style={{
-            marginTop: 32,
-            marginBottom: 16,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <LogoutButton onClick={handleLogout}>
-            <LogoutIcon
-              style={{
-                fontSize: 22,
-                color: theme === "violet" ? "#FFFFFF" : "#BEDBB0",
-              }}
-            />{" "}
-            Log out
-          </LogoutButton>
-        </div>
-      </Sidebar>
-      {/* Main Content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Header */}
+      <div style={{ position: 'sticky', left: 0, top: 0, height: '100vh', zIndex: 10, flexShrink: 0 }}>
+        <Sidebar
+          onCreateBoard={() => setBoardModalOpen(true)}
+          onHelp={() => setHelpOpen(true)}
+          onLogout={handleLogout}
+          theme={theme}
+        />
+      </div>
+      {/* Sağ ana alan: header + main */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <Header>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <FormControl
@@ -329,8 +277,6 @@ function HomePage({ setTheme, theme }) {
             </span>
           </Box>
         </Header>
-        {/* Main area */}
-
         <Main
           style={
             boardBgImg
@@ -342,25 +288,34 @@ function HomePage({ setTheme, theme }) {
           }
         >
           {selectedBoard ? (
-            <BoardDetail board={selectedBoard} />
+            <div style={{ padding: '32px 0 0 32px', minWidth: 'fit-content' }}>
+              <BoardDetail board={selectedBoard} />
+            </div>
           ) : (
             <div
               style={{
-                color: theme === "dark" ? "#bdbdbd" : "#161616",
-                fontSize: 20,
-                textAlign: "center",
-                maxWidth: 600,
+                width: '100%',
+                height: '100%',
+                minHeight: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              Before starting your project, it is essential to{" "}
-              <span
-                style={{ color: theme === "violet" ? "#5255BC" : "#bedbb0" }}
+              <p
+                style={{
+                  color: theme === "dark" ? "#bdbdbd" : "#161616",
+                  fontSize: 20,
+                  textAlign: "center",
+                  maxWidth: 600,
+                  wordBreak: 'break-word',
+                  margin: 0,
+                }}
               >
-                create a board
-              </span>{" "}
-              to visualize and track all the necessary tasks and milestones.
-              This board serves as a powerful tool to organize the workflow and
-              ensure effective collaboration among team members.
+                Before starting your project, it is essential to{' '}
+                <span style={{ color: theme === 'violet' ? '#5255BC' : '#bedbb0' }}>create a board</span>{' '}
+                to visualize and track all the necessary tasks and milestones. This board serves as a powerful tool to organize the workflow and ensure effective collaboration among team members.
+              </p>
             </div>
           )}
         </Main>
