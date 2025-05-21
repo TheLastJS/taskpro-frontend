@@ -1,4 +1,4 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
   persistStore,
   persistReducer,
@@ -8,19 +8,21 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
-} from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
-import { authReducer } from './auth/authSlice';
-import { boardReducer } from './board/boardSlice';
+import { authReducer } from "./auth/authSlice";
+import { boardReducer } from "./board/boardSlice";
+import { columnReducer } from "./column/columnSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   board: boardReducer,
+  column: columnReducer,
 });
 
 const persistConfig = {
-  key: 'auth',
+  key: "auth",
   storage,
   blacklist: [],
 };
@@ -29,7 +31,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: getDefaultMiddleware => [
+  middleware: (getDefaultMiddleware) => [
     ...getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
