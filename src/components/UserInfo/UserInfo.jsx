@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import styles from "./UserInfo.module.css";
-import axios from "axios";
+import axios from "../../redux/axiosInstance";
 import { useSelector, useDispatch } from "react-redux";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { setUser } from "../../redux/auth/authSlice";
+import { logoutThunk } from "../../redux/auth/authOperations";
 
 const UserInfo = ({ onClose }) => {
   const [user, setUserState] = useState({ name: "", email: "", avatar: "" });
@@ -18,10 +19,20 @@ const UserInfo = ({ onClose }) => {
   useEffect(() => {
     axios.get("/users/current", {
       headers: { Authorization: `Bearer ${token}` }
-    }).then(res => {
-      setUserState(res.data.data);
-      setForm({ name: res.data.data.name, email: res.data.data.email, password: "" });
-    });
+    })
+      .then(res => {
+        setUserState(res.data.data);
+        setForm({ name: res.data.data.name, email: res.data.data.email, password: "" });
+      })
+      .catch(err => {
+        if (err.response && err.response.status === 401) {
+          alert("Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.");
+          dispatch(logoutThunk());
+          if (onClose) onClose();
+        } else {
+          alert("Profil bilgileri alınırken bir hata oluştu.");
+        }
+      });
   }, [token]);
 
   const handleChange = e => {
