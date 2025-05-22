@@ -14,6 +14,9 @@ import { backgroundTypes } from "./BoardModal";
 import ColumnModal from "./ColumnModal";
 import EditColumnModal from "./EditColumnModal";
 import DeleteConfirmModal from "./DeleteColumnModal.jsx";
+import filter from "../assets/icons/filter.svg";
+import pencil from "../assets/icons/pencil.svg";
+import trash from "../assets/icons/trash.svg";
 
 const BoardDetail = ({ board }) => {
   const dispatch = useDispatch();
@@ -59,64 +62,95 @@ const BoardDetail = ({ board }) => {
 
   return (
     <div>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 8,
-        position: 'sticky',
-        top: 0,
-        zIndex: 15,
-        background: 'rgba(24,24,24,0.95)',
-        backdropFilter: 'blur(2px)',
-        paddingRight: 32,
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <h1 style={{ color: '#fff', margin: 0 }}>{board.title}</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          top: 64,
+          backdropFilter: "blur(2px)",
+          zIndex: 15,
+          paddingRight: 32,
+          position: "fixed",
+          margin: 0,
+          left: 260,
+          right: 0,
+          padding: "12px 32px",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <h1 style={{ color: "#fff", margin: 0 }}>{board.title}</h1>
           {columns.length === 0 && (
             <button
               onClick={() => setShowAddModal(true)}
               style={{
-                padding: '12px 24px',
-                background: '#232323',
-                color: '#fff',
-                border: 'none',
+                padding: "12px 24px",
+                background: "#232323",
+                color: "#fff",
+                border: "none",
                 borderRadius: 8,
                 fontWeight: 500,
                 fontSize: 16,
                 marginTop: 8,
                 marginBottom: 16,
-                cursor: 'pointer',
-                textAlign: 'left',
+                cursor: "pointer",
+                textAlign: "left",
               }}
             >
               + Add column
             </button>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           {columns.length > 0 && (
             <button
               onClick={() => setShowAddModal(true)}
               style={{
-                padding: '12px 24px',
-                background: '#232323',
-                color: '#fff',
-                border: 'none',
+                padding: "12px 24px",
+                background: "#232323",
+                color: "#fff",
+                border: "none",
                 borderRadius: 8,
                 fontWeight: 500,
-                fontSize: 16,
-                cursor: 'pointer',
-                textAlign: 'left',
+                fontSize: 14,
+                cursor: "pointer",
+                textAlign: "left",
               }}
             >
               + Add another column
             </button>
           )}
-          <h1 style={{ color: '#fff', margin: 0, marginRight: 32 }}>filtre</h1>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "row",
+              cursor: "pointer",
+            }}
+          >
+            <img
+              src={filter}
+              alt="Filter"
+              style={{
+                width: 16,
+                height: 14,
+                marginRight: 4,
+              }}
+            ></img>
+            <h1
+              style={{
+                color: "#fff",
+                margin: 0,
+                marginRight: 32,
+                fontSize: "14px",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Filters
+            </h1>
+          </div>
         </div>
       </div>
-
       {showAddModal && (
         <ColumnModal
           onClose={() => setShowAddModal(false)}
@@ -141,46 +175,63 @@ const BoardDetail = ({ board }) => {
       )}
 
       {isLoading ? (
-        <p style={{ color: '#ccc' }}>Loading columns...</p>
+        <p style={{ color: "#ccc" }}>Loading columns...</p>
       ) : Array.isArray(columns) && columns.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 24, marginTop: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 24,
+            marginTop: 32,
+          }}
+        >
           {columns.map((col) => (
             <div
               key={col._id}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '20px',
-                justifyContent: 'space-between',
-                borderRadius: '8px',
-                width: '334px',
-                height: '56px',
-                background: '#121212',
+                display: "flex",
+                alignItems: "center",
+                padding: "20px",
+                justifyContent: "space-between",
+                borderRadius: "8px",
+                width: "334px",
+                height: "56px",
+                background: "#121212",
               }}
             >
-              <span style={{ color: '#fff' }}>{col.title}</span>
-              <div>
-                <button
+              <span style={{ color: "#fff" }}>{col.title}</span>
+              <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                <img
+                  style={{ cursor: "pointer" }}
+                  src={pencil}
+                  alt="pencil"
                   onClick={() =>
                     setEditColumn({ columnId: col._id, title: col.title })
                   }
-                >
-                  ✏️
-                </button>
-                <button
+                />
+                <img
+                  style={{ cursor: "pointer" }}
+                  src={trash}
+                  alt="trash"
                   onClick={() =>
                     setDeleteColumn({ columnId: col._id, title: col.title })
                   }
-                >
-                  🗑
-                </button>
+                />
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div style={{ width: '100%', height: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <p style={{ color: '#ccc', fontSize: 20 }}>No columns found.</p>
+        <div
+          style={{
+            width: "100%",
+            height: "60vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p style={{ color: "#ccc", fontSize: 20 }}>No columns found.</p>
         </div>
       )}
     </div>

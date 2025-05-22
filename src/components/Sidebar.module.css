@@ -1,0 +1,20 @@
+/* Sidebar.module.css içine ekleyebilirsin */
+.scrollableList {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #bedbb0 transparent;
+}
+
+/* Chrome / Safari için özel scrollbar stilleri */
+.scrollableList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollableList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollableList::-webkit-scrollbar-thumb {
+  background-color: #bedbb0;
+  border-radius: 4px;
+}

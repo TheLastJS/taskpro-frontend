@@ -8,7 +8,7 @@ instance.interceptors.request.use(
   (config) => {
     const persistedAuth = localStorage.getItem("persist:auth");
     let token = null;
-    
+
     if (persistedAuth) {
       try {
         const root = JSON.parse(persistedAuth);
@@ -27,7 +27,7 @@ instance.interceptors.request.use(
     } else {
       console.warn("No auth token found");
     }
-    
+
     return config;
   },
   (error) => {
@@ -49,4 +49,4 @@ instance.interceptors.response.use(
   }
 );
 
-export default instance; 
+export default instance;
