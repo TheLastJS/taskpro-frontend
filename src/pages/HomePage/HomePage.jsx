@@ -17,6 +17,7 @@ import Sidebar from "../../components/Sidebar";
 import BoardDetail from "../../components/BoardDetail";
 import { selectSelectedBoard } from "../../redux/board/boardSelectors";
 import { backgroundTypes } from "../../components/BoardModal";
+import scrollbar from "../../components/Sidebar.module.css";
 
 const Layout = styled.div`
   display: flex;
@@ -65,11 +66,7 @@ const Main = styled.main`
   overflow-x: auto;
   overflow-y: hidden;
 `;
-const MainContent = styled.main`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`;
+
 const BoardButton = styled.button`
   width: 100%;
   padding: 12px;
@@ -130,7 +127,16 @@ function HomePage({ setTheme, theme }) {
   return (
     <Layout>
       {/* Sidebar */}
-      <div style={{ position: 'sticky', left: 0, top: 0, height: '100vh', zIndex: 10, flexShrink: 0 }}>
+      <div
+        style={{
+          position: "sticky",
+          left: 0,
+          top: 0,
+          height: "100vh",
+          zIndex: 10,
+          flexShrink: 0,
+        }}
+      >
         <Sidebar
           onCreateBoard={() => setBoardModalOpen(true)}
           onHelp={() => setHelpOpen(true)}
@@ -139,7 +145,14 @@ function HomePage({ setTheme, theme }) {
         />
       </div>
       {/* Sağ ana alan: header + main */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+        }}
+      >
         <Header>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <FormControl
@@ -286,20 +299,21 @@ function HomePage({ setTheme, theme }) {
                 }
               : {}
           }
+          className={scrollbar.scrollableList}
         >
           {selectedBoard ? (
-            <div style={{ padding: '32px 0 0 32px', minWidth: 'fit-content' }}>
+            <div style={{ padding: "32px 0 0 32px", minWidth: "fit-content" }}>
               <BoardDetail board={selectedBoard} />
             </div>
           ) : (
             <div
               style={{
-                width: '100%',
-                height: '100%',
-                minHeight: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                width: "100%",
+                height: "100%",
+                minHeight: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <p
@@ -308,13 +322,19 @@ function HomePage({ setTheme, theme }) {
                   fontSize: 20,
                   textAlign: "center",
                   maxWidth: 600,
-                  wordBreak: 'break-word',
+                  wordBreak: "break-word",
                   margin: 0,
                 }}
               >
-                Before starting your project, it is essential to{' '}
-                <span style={{ color: theme === 'violet' ? '#5255BC' : '#bedbb0' }}>create a board</span>{' '}
-                to visualize and track all the necessary tasks and milestones. This board serves as a powerful tool to organize the workflow and ensure effective collaboration among team members.
+                Before starting your project, it is essential to{" "}
+                <span
+                  style={{ color: theme === "violet" ? "#5255BC" : "#bedbb0" }}
+                >
+                  create a board
+                </span>{" "}
+                to visualize and track all the necessary tasks and milestones.
+                This board serves as a powerful tool to organize the workflow
+                and ensure effective collaboration among team members.
               </p>
             </div>
           )}

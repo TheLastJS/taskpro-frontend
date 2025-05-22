@@ -4,12 +4,10 @@ import { authService } from "../../services/authService";
 
 axios.defaults.baseURL = "https://taskpro-backend-65h4.onrender.com";
 
-
 export const registerThunk = createAsyncThunk(
   "auth/register",
   async (credentials, thunkAPI) => {
     try {
-
       await axios.post("/auth/register", credentials);
       // Kayıt sonrası otomatik login
       const response = await axios.post("/auth/login", {
@@ -29,7 +27,6 @@ export const registerThunk = createAsyncThunk(
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || error.message || "Registration failed"
       );
-
     }
   }
 );
@@ -38,14 +35,12 @@ export const loginThunk = createAsyncThunk(
   "auth/login",
   async (credentials, thunkAPI) => {
     try {
-
       const response = await axios.post("/auth/login", credentials);
       console.log("LOGIN RESPONSE:", response.data);
       const token = response.data?.data?.accessToken;
       const user = response.data?.data?.user;
       if (!token) throw new Error("Token alınamadı!");
       return { token, user };
-
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message || "Login failed");
     }
