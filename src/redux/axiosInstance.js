@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://taskpro-backend-65h4.onrender.com",
+  baseURL: "http://localhost:3000",
 });
 
 instance.interceptors.request.use(
