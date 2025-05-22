@@ -54,7 +54,7 @@ function AddCardModal({ open, onClose, onAdd, columnId, boardId, initialValues =
       setTouched(false);
       setShowCalendar(false);
     }
-  }, [open, initialValues]);
+  }, [open]);
 
   if (!open) return null;
 
