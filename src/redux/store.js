@@ -14,11 +14,13 @@ import storage from "redux-persist/lib/storage";
 import { authReducer } from "./auth/authSlice";
 import { boardReducer } from "./board/boardSlice";
 import { columnReducer } from "./column/columnSlice";
+import { taskReducer } from "./column/taskSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   board: boardReducer,
   column: columnReducer,
+  task: taskReducer,
 });
 
 const persistConfig = {

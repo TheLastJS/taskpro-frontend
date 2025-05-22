@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createBoardThunk } from '../redux/board/boardOperations';
+import { createBoardThunk, updateBoardThunk } from '../redux/board/boardOperations';
 import { selectBoardsLoading } from '../redux/board/boardSelectors';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -57,32 +57,54 @@ export const backgroundTypes = [
   { name: '14', img: bg15 },
 ];
 
-const BoardModal = ({ open, onClose }) => {
-  const [title, setTitle] = useState('');
-  const [icon, setIcon] = useState(iconTypes[0].name);
-  const [background, setBackground] = useState(backgroundTypes[0].name);
+const BoardModal = ({ open, onClose, editBoard = false, initialBoard = null }) => {
+  const [title, setTitle] = useState(initialBoard?.title || '');
+  const [icon, setIcon] = useState(initialBoard?.icon || iconTypes[0].name);
+  const [background, setBackground] = useState(initialBoard?.background || backgroundTypes[0].name);
   const dispatch = useDispatch();
   const loading = useSelector(selectBoardsLoading);
+
+  useEffect(() => {
+    if (open && initialBoard) {
+      setTitle(initialBoard.title || '');
+      setIcon(initialBoard.icon || iconTypes[0].name);
+      setBackground(initialBoard.background || backgroundTypes[0].name);
+    } else if (open && !initialBoard) {
+      setTitle('');
+      setIcon(iconTypes[0].name);
+      setBackground(backgroundTypes[0].name);
+    }
+  }, [open, initialBoard]);
 
   if (!open) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    const boardData = { title, icon };
-    if (background !== '') boardData.background = background;
-    try {
-      const result = await dispatch(createBoardThunk(boardData)).unwrap();
-      if (result && onClose) onClose();
-      setTitle('');
-      setIcon(iconTypes[0].name);
-      setBackground(backgroundTypes[0].name);
-    } catch (err) {
-      console.log('Board create error:', err?.message);
-      if (err?.message && err.message.toLowerCase().includes('already exists')) {
-        toast.error('Board name is already existed');
-      } else {
-        toast.error(err?.message || 'Board could not be created!');
+    if (editBoard && initialBoard) {
+      await dispatch(updateBoardThunk({
+        id: initialBoard._id,
+        title,
+        icon,
+        background,
+      }));
+      if (onClose) onClose();
+    } else {
+      const boardData = { title, icon };
+      if (background !== '') boardData.background = background;
+      try {
+        const result = await dispatch(createBoardThunk(boardData)).unwrap();
+        if (result && onClose) onClose();
+        setTitle('');
+        setIcon(iconTypes[0].name);
+        setBackground(backgroundTypes[0].name);
+      } catch (err) {
+        console.log('Board create error:', err?.message);
+        if (err?.message && err.message.toLowerCase().includes('already exists')) {
+          toast.error('Board name is already existed');
+        } else {
+          toast.error(err?.message || 'Board could not be created!');
+        }
       }
     }
   };
@@ -92,7 +114,7 @@ const BoardModal = ({ open, onClose }) => {
       position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
     }}>
       <div style={{ background: '#181818', padding: 32, borderRadius: 8, minWidth: 340, color: '#fff' }}>
-        <h3 style={{ marginBottom: 16 }}>New board</h3>
+        <h3 style={{ marginBottom: 16 }}>{editBoard ? 'Edit board' : 'New board'}</h3>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -193,7 +215,7 @@ const BoardModal = ({ open, onClose }) => {
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button type="submit" disabled={loading || !title.trim()} style={{ flex: 1, padding: '10px 0', background: '#bedbb0', color: '#232323', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 16 }}>
-              {loading ? 'Creating...' : (<><span style={{fontSize:18,marginRight:6}}>+</span> Create</>)}
+              {loading ? (editBoard ? 'Saving...' : 'Creating...') : (<><span style={{fontSize:18,marginRight:6}}>+</span> {editBoard ? 'Save' : 'Create'}</>)}
             </button>
             <button type="button" onClick={onClose} style={{ flex: 1, padding: '10px 0', background: '#232323', color: '#fff', border: '1px solid #444', borderRadius: 8, fontWeight: 600, fontSize: 16 }}>
               Cancel
