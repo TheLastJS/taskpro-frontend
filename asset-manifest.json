@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/taskpro-frontend/static/css/main.058abb42.css",
-    "main.js": "/taskpro-frontend/static/js/main.f1cb8a3a.js",
+    "main.js": "/taskpro-frontend/static/js/main.c5c8ab43.js",
     "static/media/desktop-9.png": "/taskpro-frontend/static/media/desktop-9.fd87bb3c9522ccf0a58f.png",
     "static/media/desktop-13.png": "/taskpro-frontend/static/media/desktop-13.8aafb136baaeed3a2e50.png",
     "static/media/desktop-1.png": "/taskpro-frontend/static/media/desktop-1.00bbf33271f1cce9261f.png",
@@ -33,10 +33,10 @@
     "static/media/puzzle-piece-02.svg": "/taskpro-frontend/static/media/puzzle-piece-02.9fad58116b3897b365b0f9af9eae2fcc.svg",
     "static/media/filter.svg": "/taskpro-frontend/static/media/filter.7f78fc401fac6e5e371792e98a39ce4e.svg",
     "main.058abb42.css.map": "/taskpro-frontend/static/css/main.058abb42.css.map",
-    "main.f1cb8a3a.js.map": "/taskpro-frontend/static/js/main.f1cb8a3a.js.map"
+    "main.c5c8ab43.js.map": "/taskpro-frontend/static/js/main.c5c8ab43.js.map"
   },
   "entrypoints": [
     "static/css/main.058abb42.css",
-    "static/js/main.f1cb8a3a.js"
+    "static/js/main.c5c8ab43.js"
   ]
 }
