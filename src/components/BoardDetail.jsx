@@ -261,7 +261,20 @@ const TaskCard = ({ task, columnId, onEdit, onDelete, onMove, theme }) => {
     }}>
       <div style={{ flex: 1, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ fontWeight: 600, fontSize: 16 }}>{task.title}</div>
-        {task.description && <div style={{ color: cardSubTextColor, fontSize: 14 }}>{task.description}</div>}
+        {task.description && (
+          <div style={{ 
+            color: cardSubTextColor, 
+            fontSize: 14,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            lineHeight: '1.4em',
+            maxHeight: '2.8em'
+          }}>
+            {task.description}
+          </div>
+        )}
         <hr style={{ border: 'none', borderTop: `1px solid ${cardBorderColor}`, margin: '10px 0 6px 0' }} />
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 18, marginTop: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 60 }}>
