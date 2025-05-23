@@ -87,8 +87,8 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
         style={{
           width: 260,
           background:
-            theme === "dark" ? "#232323" : theme === "light" ? "#FFFFFF" : "#fff",
-          color: theme === "dark" ? "#fff" : "#232323",
+            theme === "dark" ? "#232323" : theme === "light" ? "#FFFFFF" : "#5255BC",
+          color: theme === "dark" ? "#fff" : theme === "violet" ? "#FFFFFF" : "#232323",
           padding: 24,
           minHeight: "100vh",
         }}
@@ -134,8 +134,8 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+              borderTop: theme === "light" ? "1px solid rgba(35, 35, 35, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
+              borderBottom: theme === "light" ? "1px solid rgba(35, 35, 35, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
               marginBottom: 40,
               padding: "8px 0",
             }}
@@ -185,17 +185,21 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
                       marginBottom: 8,
                       background:
                         selectedBoardId === board._id
-                          ? "#333"
-                          : theme === "light"
-                          ? "#F6F6F7"
-                          : "#232323",
+                          ? theme === "dark" ? "#171717" : theme === "light" ? "#F6F6F7" : "#7577C9"
+                          : "transparent",
                       borderRadius: 4,
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
                       gap: 4,
-                      color: "#fff",
+                      color: selectedBoardId === board._id
+                        ? theme === "dark" ? "#fff" : theme === "light" ? "#232323" : "#fff"
+                        : theme === "dark" ? "rgba(255, 255, 255, 0.5)" : theme === "light" ? "rgba(35, 35, 35, 0.5)" : "rgba(255, 255, 255, 0.5)",
+                      borderLeft: selectedBoardId === board._id ? 
+                        theme === "dark" ? "4px solid #BEDBB0" : 
+                        theme === "light" ? "4px solid #BEDBB0" : 
+                        "4px solid #ffffff" : "none",
                     }}
                     onClick={() => dispatch(setSelectedBoard(board._id))}
                   >
@@ -204,6 +208,9 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
                         marginRight: 8,
                         display: "flex",
                         alignItems: "center",
+                        color: selectedBoardId === board._id
+                          ? theme === "dark" ? "#fff" : theme === "light" ? "#232323" : "#fff"
+                          : theme === "dark" ? "rgba(255, 255, 255, 0.5)" : theme === "light" ? "rgba(35, 35, 35, 0.5)" : "rgba(255, 255, 255, 0.5)",
                       }}
                     >
                       {iconMap[board.icon] || <WorkIcon fontSize="small" />}
@@ -259,13 +266,21 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
                       </IconButton> */}
                       <div style={{ display: "flex", gap: 9.45 }}>
                         <img
-                          style={{ cursor: "pointer" }}
+                          style={{ 
+                            cursor: "pointer",
+                            filter: theme === 'dark' ? 'none' : theme === 'violet' ? 'none' : 'brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(50%) contrast(100%)',
+                            opacity: theme === 'violet' ? 0.5 : 1
+                          }}
                           src={pencil}
                           alt="pencil"
                           onClick={() => handleEdit(board)}
                         />
                         <img
-                          style={{ cursor: "pointer" }}
+                          style={{ 
+                            cursor: "pointer",
+                            filter: theme === 'dark' ? 'none' : theme === 'violet' ? 'none' : 'brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(50%) contrast(100%)',
+                            opacity: theme === 'violet' ? 0.5 : 1
+                          }}
                           src={trash}
                           alt="trash"
                           onClick={() => handleDelete(board)}
@@ -286,7 +301,7 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
                 ? "#292929"
                 : theme === "light"
                 ? "#F6F6F7"
-                : "#f5f5f5",
+                : "#8F92D6",
             borderRadius: 16,
             padding: 20,
             width: "100%",

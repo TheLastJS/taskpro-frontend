@@ -21,3 +21,7 @@
 :root {
   font-family: "Poppins", sans-serif;
 }
+
+html, body {
+  background-color: #1F1F1F;
+}

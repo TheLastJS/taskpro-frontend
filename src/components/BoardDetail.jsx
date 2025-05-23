@@ -13,6 +13,7 @@ import {
   selectTasksByColumn,
 } from "../redux/column/columnSelectors";
 import { backgroundTypes } from "./BoardModal";
+import { getTextColorByBackground } from "../utils/getTextColorByBackground";
 import ColumnModal from "./ColumnModal";
 import EditColumnModal from "./EditColumnModal";
 import DeleteConfirmModal from "./DeleteColumnModal.jsx";
@@ -218,7 +219,7 @@ function AddCardModal({ open, onClose, onAdd, columnId, boardId, initialValues =
   );
 }
 
-const TaskCard = ({ task, columnId, onEdit, onDelete, onMove }) => {
+const TaskCard = ({ task, columnId, onEdit, onDelete, onMove, theme }) => {
   const priorityColors = {
     Low: '#8FA1D0',
     Medium: '#E09CB5',
@@ -233,42 +234,46 @@ const TaskCard = ({ task, columnId, onEdit, onDelete, onMove }) => {
     deadlineDate.setHours(0,0,0,0);
     showBell = deadlineDate <= today;
   }
+
+  // Tema renklerine göre card arkaplanı ve yazı rengi
+  const cardBg = theme === 'light' ? '#FFFFFF' : theme === 'violet' ? '#FFFFFF' : '#232323';
+  const cardTextColor = theme === 'light' ? '#232323' : theme === 'violet' ? '#232323' : '#fff';
+  const cardSubTextColor = theme === 'light' ? '#8B8B8B' : theme === 'violet' ? '#8B8B8B' : '#bdbdbd';
+  const cardBorderColor = theme === 'light' ? '#E8E8E8' : theme === 'violet' ? '#E8E8E8' : '#393939';
+  
+  // İkon renkleri - light ve violet temada gri, dark temada beyaz
+  const iconFilter = theme === 'dark' ? 'none' : 'brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(50%) contrast(100%)';
+
   return (
     <div style={{
-      background: '#232323',
+      background: cardBg,
       borderRadius: 12,
       padding: 0,
       marginBottom: 12,
-      color: '#fff',
+      color: cardTextColor,
       boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
       width: '100%',
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'stretch',
       minHeight: 64,
+      borderLeft: `8px solid ${priorityColors[task.priority] || '#5C5C5C'}`,
     }}>
-      <div style={{
-        width: 8,
-        borderTopLeftRadius: 12,
-        borderBottomLeftRadius: 12,
-        background: priorityColors[task.priority] || '#5C5C5C',
-        marginRight: 0,
-      }} />
       <div style={{ flex: 1, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ fontWeight: 600, fontSize: 16 }}>{task.title}</div>
-        {task.description && <div style={{ color: '#bdbdbd', fontSize: 14 }}>{task.description}</div>}
-        <hr style={{ border: 'none', borderTop: '1px solid #393939', margin: '10px 0 6px 0' }} />
+        {task.description && <div style={{ color: cardSubTextColor, fontSize: 14 }}>{task.description}</div>}
+        <hr style={{ border: 'none', borderTop: `1px solid ${cardBorderColor}`, margin: '10px 0 6px 0' }} />
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 18, marginTop: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 60 }}>
-            <span style={{ color: '#bdbdbd', fontSize: 12, fontWeight: 400, marginBottom: 2 }}>Priority</span>
+            <span style={{ color: cardSubTextColor, fontSize: 12, fontWeight: 400, marginBottom: 2 }}>Priority</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: priorityColors[task.priority] || '#5C5C5C', display: 'inline-block', border: '2px solid #fff' }}></span>
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: priorityColors[task.priority] || '#5C5C5C', display: 'inline-block' }}></span>
               <span style={{ color: priorityColors[task.priority] || '#5C5C5C', fontWeight: 500, fontSize: 13 }}>{task.priority}</span>
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 90 }}>
-            <span style={{ color: '#bdbdbd', fontSize: 12, fontWeight: 400, marginBottom: 2 }}>Deadline</span>
-            <span style={{ color: '#fff', fontSize: 13, fontWeight: 500 }}>
+            <span style={{ color: cardSubTextColor, fontSize: 12, fontWeight: 400, marginBottom: 2 }}>Deadline</span>
+            <span style={{ color: cardTextColor, fontSize: 13, fontWeight: 500 }}>
               {task.deadline ? new Date(task.deadline).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
             </span>
           </div>
@@ -276,9 +281,9 @@ const TaskCard = ({ task, columnId, onEdit, onDelete, onMove }) => {
             {showBell && (
               <img src={bell} alt="bell" style={{ width: 18, height: 18, cursor: 'pointer' }} />
             )}
-            <img src={arrowRight} alt="move" style={{ width: 18, height: 18, cursor: 'pointer', opacity: 0.7 }} onClick={() => onMove && onMove(task, columnId)} />
-            <img src={pencil} alt="edit" style={{ width: 18, height: 18, cursor: 'pointer', opacity: 0.7 }} onClick={() => onEdit && onEdit(task, columnId)} />
-            <img src={trash} alt="delete" style={{ width: 18, height: 18, cursor: 'pointer', opacity: 0.7 }} onClick={() => onDelete && onDelete(task, columnId)} />
+            <img src={arrowRight} alt="move" style={{ width: 18, height: 18, cursor: 'pointer', opacity: 0.7, filter: iconFilter }} onClick={() => onMove && onMove(task, columnId)} />
+            <img src={pencil} alt="edit" style={{ width: 18, height: 18, cursor: 'pointer', opacity: 0.7, filter: iconFilter }} onClick={() => onEdit && onEdit(task, columnId)} />
+            <img src={trash} alt="delete" style={{ width: 18, height: 18, cursor: 'pointer', opacity: 0.7, filter: iconFilter }} onClick={() => onDelete && onDelete(task, columnId)} />
           </div>
         </div>
       </div>
@@ -286,7 +291,7 @@ const TaskCard = ({ task, columnId, onEdit, onDelete, onMove }) => {
   );
 };
 
-const BoardDetail = ({ board }) => {
+const BoardDetail = ({ board, theme }) => {
   const dispatch = useDispatch();
   const columns = useSelector(selectColumns);
   const isLoading = useSelector(selectIsLoading);
@@ -301,6 +306,16 @@ const BoardDetail = ({ board }) => {
 
   const bgObj = backgroundTypes.find((bg) => bg.name === board.background);
   const bgImg = bgObj ? bgObj.img : undefined;
+
+  // Board background'ına göre text rengini belirle
+  const textColor = getTextColorByBackground(board.background || '', theme);
+
+  // Tema renklerine göre column arkaplanı
+  const columnBg = theme === 'light' ? '#FFFFFF' : theme === 'violet' ? '#FFFFFF' : '#121212';
+  const columnTextColor = theme === 'light' ? '#232323' : theme === 'violet' ? '#232323' : '#FFFFFF';
+  
+  // Column ikonları için filter
+  const columnIconFilter = theme === 'dark' ? 'none' : 'brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(50%) contrast(100%)';
 
   useEffect(() => {
     if (board?._id) {
@@ -398,13 +413,13 @@ const BoardDetail = ({ board }) => {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <h1 style={{ color: "#fff", margin: 0 }}>{board.title}</h1>
+          <h1 style={{ color: textColor, margin: 0 }}>{board.title}</h1>
           {columns.length === 0 && (
             <button
               onClick={() => setShowAddModal(true)}
               style={{
                 padding: "12px 24px",
-                background: "#232323",
+                background: "#121212",
                 color: "#fff",
                 border: "none",
                 borderRadius: 8,
@@ -426,7 +441,7 @@ const BoardDetail = ({ board }) => {
               onClick={() => setShowAddModal(true)}
               style={{
                 padding: "12px 24px",
-                background: "#232323",
+                background: "#121212",
                 color: "#fff",
                 border: "none",
                 borderRadius: 8,
@@ -454,11 +469,14 @@ const BoardDetail = ({ board }) => {
                 width: 16,
                 height: 14,
                 marginRight: 4,
+                filter: textColor === '#ffffff' ? 
+                  "brightness(0) saturate(100%) invert(82%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(82%) contrast(100%)" :
+                  "brightness(0) saturate(100%) invert(26%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(26%) contrast(100%)",
               }}
             ></img>
             <h1
               style={{
-                color: "#fff",
+                color: textColor,
                 margin: 0,
                 marginRight: 32,
                 fontSize: "14px",
@@ -502,9 +520,8 @@ const BoardDetail = ({ board }) => {
             flexDirection: "row",
             gap: 24,
             marginTop: 32,
-            overflowX: "auto",
-            overflowY: "hidden",
-            height: 540,
+            overflow: "hidden",
+            height: "calc(100vh - 138px)",
             alignItems: "flex-start",
           }}
         >
@@ -520,6 +537,7 @@ const BoardDetail = ({ board }) => {
                   width: "334px",
                   marginBottom: 16,
                   overflowX: "hidden",
+                  height: '100%',
                 }}
               >
                 <div
@@ -531,13 +549,13 @@ const BoardDetail = ({ board }) => {
                     borderRadius: "8px",
                     width: "334px",
                     height: "56px",
-                    background: "#121212",
+                    background: columnBg,
                   }}
                 >
-                  <span style={{ color: "#fff" }}>{col.title}</span>
+                  <span style={{ color: columnTextColor }}>{col.title}</span>
                   <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
                     <img
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: "pointer", filter: columnIconFilter }}
                       src={pencil}
                       alt="pencil"
                       onClick={() =>
@@ -545,7 +563,7 @@ const BoardDetail = ({ board }) => {
                       }
                     />
                     <img
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: "pointer", filter: columnIconFilter }}
                       src={trash}
                       alt="trash"
                       onClick={() =>
@@ -554,8 +572,8 @@ const BoardDetail = ({ board }) => {
                     />
                   </div>
                 </div>
-                <div style={{ width: '100%', marginTop: 16, height: 420, display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
-                  <div style={{ flex: 1, overflowY: 'auto', minHeight: 20, overflowX: 'hidden' }}>
+                <div style={{ width: '100%', marginTop: 16, height: '100%', display: 'flex', flexDirection: 'column', overflowX: 'hidden', flex: 1 }}>
+                  <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, overflowX: 'hidden' }}>
                     {tasks.length > 0 && tasks.map(task => (
                       <TaskCard
                         key={task._id}
@@ -564,6 +582,7 @@ const BoardDetail = ({ board }) => {
                         onEdit={handleEditCard}
                         onDelete={handleDeleteCard}
                         onMove={handleMoveCard}
+                        theme={theme}
                       />
                     ))}
                   </div>
@@ -572,14 +591,15 @@ const BoardDetail = ({ board }) => {
                       width: "100%",
                       padding: "16px 0",
                       borderRadius: 8,
-                      background: "#bedbb0",
-                      color: "#151515",
+                      background: theme === 'violet' ? '#5255BC' : "#bedbb0",
+                      color: theme === 'violet' ? '#FFFFFF' : "#151515",
                       border: "none",
                       fontWeight: 500,
                       fontSize: 16,
                       marginTop: 8,
                       cursor: "pointer",
                       transition: "background 0.2s",
+                      flexShrink: 0,
                     }}
                     onClick={() => setAddCardModal({ open: true, columnId: col._id })}
                   >

@@ -189,7 +189,7 @@ function HomePage({ setTheme, theme }) {
                       : "#000",
                   background:
                     theme === "violet"
-                      ? "#D6D8FF"
+                      ? "#FFFFFF"
                       : theme === "light"
                       ? "#fff"
                       : "#232323",
@@ -239,7 +239,7 @@ function HomePage({ setTheme, theme }) {
                   fontWeight: 600,
                   fontSize: 18,
                   marginRight: 12,
-                  color: theme === "light" ? "#161616" : "#fff",
+                  color: theme === "light" ? "#161616" : theme === "violet" ? "#000000" : "#fff",
                   maxWidth: 180,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -303,7 +303,7 @@ function HomePage({ setTheme, theme }) {
         >
           {selectedBoard ? (
             <div style={{ padding: "32px 0 0 32px", minWidth: "fit-content" }}>
-              <BoardDetail board={selectedBoard} />
+              <BoardDetail board={selectedBoard} theme={theme} />
             </div>
           ) : (
             <div
