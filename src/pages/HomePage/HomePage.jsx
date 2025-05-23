@@ -12,12 +12,13 @@ import HelpModal from "../../components/HelpModal";
 
 import { Select, MenuItem, InputLabel, FormControl, Box } from "@mui/material";
 import styled from "styled-components";
-import BoardModal from "../../components/BoardModal";
+import BoardModal from "../../components/BoardModal/BoardModal";
 import Sidebar from "../../components/Sidebar";
 import BoardDetail from "../../components/BoardDetail";
 import { selectSelectedBoard } from "../../redux/board/boardSelectors";
 import { backgroundTypes } from "../../components/BoardModal";
 import scrollbar from "../../components/Sidebar.module.css";
+import { themes } from "../../theme";
 
 const Layout = styled.div`
   display: flex;
@@ -348,6 +349,7 @@ function HomePage({ setTheme, theme }) {
       <BoardModal
         open={isBoardModalOpen}
         onClose={() => setBoardModalOpen(false)}
+        themeObj={themes[theme]}
       />
     </Layout>
   );
