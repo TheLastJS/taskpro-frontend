@@ -1,81 +1,106 @@
 .backgroundLinear {
-    background: linear-gradient(180deg, rgba(196, 196, 196, 0) 25%, #BEDBB0 92.19%);
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: linear-gradient(180deg, rgba(196, 196, 196, 0) 25%, #beddb0 92.19%);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .container {
-    display: flex;
-    align-items: center;
-    justify-items: center;
-    flex-direction: column;
-    height: 438px;
-    width: 473px;
-    text-align: center;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  flex-direction: column;
+  height: 438px;
+  width: 473px;
+  text-align: center;
 }
 
 .wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 48px;
 }
 
 .logo {
-    display: flex;
-    flex-direction: row;
-    gap: 6px;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
 }
 
 .logo p {
-    font-family: Poppins;
-    font-weight: 600;
-    font-size: 40px;
-    line-height: 100%;
-    letter-spacing: -4%;
+  font-family: Poppins;
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 100%;
+  letter-spacing: -4%;
 }
 
 .button {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .buttonRegister {
-    width: 344px;
-    height: 49px;
-    top: 354px;
-    left: 65px;
-    border-radius: 8px;
-    background-color: black;
-    color: white;
-    cursor: pointer;
+  width: 344px;
+  height: 49px;
+  top: 354px;
+  left: 65px;
+  border-radius: 8px;
+  background-color: black;
+  color: white;
+  cursor: pointer;
 }
 
 .buttonLogin {
-    background-color: transparent;
-    border: none;
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
+  background-color: transparent;
+  border: none;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 .buttonRegister p {
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 100%;
-    letter-spacing: -2%;
-    text-align: center;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-align: center;
 }
 
 .welcomeText {
-    font-family: Poppins;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 18px;
-    letter-spacing: -2%;
-    text-align: center;
-    
+  font-family: Poppins;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: -2%;
+  text-align: center;
+}
+
+.googleAuthButton {
+  width: 344px;
+  height: 49px;
+  border-radius: 8px;
+  background-color: #010001;
+  color: #fff;
+  font-family: Poppins, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid #bedbb0;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: background 0.2s, border-color 0.2s;
+  margin-bottom: 2px;
+}
+
+.googleAuthButton:hover {
+  background-color: #252525;
+  border-color: #5255bc;
 }
