@@ -48,13 +48,17 @@ export const deleteTaskThunk = createAsyncThunk(
 // Update a task in a column
 export const updateTaskThunk = createAsyncThunk(
   'task/updateTask',
-  async ({ boardId, columnId, taskId, title, description, priority, deadline }, thunkAPI) => {
+  async (
+    { boardId, columnId, taskId, title, description, priority, deadline, column },
+    thunkAPI
+  ) => {
     try {
       const res = await axios.patch(`/boards/${boardId}/columns/${columnId}/task/${taskId}`, {
         title,
         description,
         priority,
         deadline,
+        column,
       });
       return { columnId, task: res.data.data.task };
     } catch (err) {
@@ -76,4 +80,4 @@ export const moveTaskThunk = createAsyncThunk(
       return thunkAPI.rejectWithValue(err.response?.data?.message || 'Failed to move task');
     }
   }
-); 
+);
