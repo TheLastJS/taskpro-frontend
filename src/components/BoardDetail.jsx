@@ -303,6 +303,7 @@ const BoardDetail = ({ board, theme }) => {
   const [editCardModal, setEditCardModal] = useState({ open: false, card: null, columnId: null });
   const [deleteCardModal, setDeleteCardModal] = useState({ open: false, card: null, columnId: null });
   const [moveCardModal, setMoveCardModal] = useState({ open: false, card: null, fromColumnId: null });
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 800;
 
   const bgObj = backgroundTypes.find((bg) => bg.name === board.background);
   const bgImg = bgObj ? bgObj.img : undefined;
@@ -397,21 +398,34 @@ const BoardDetail = ({ board, theme }) => {
   return (
     <div>
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          top: 64,
-          backdropFilter: "blur(2px)",
-          zIndex: 15,
-          paddingRight: 32,
-          position: "fixed",
-          margin: 0,
-          left: 260,
-          right: 0,
-          padding: "12px 32px",
-        }}
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+                padding: "8px 8px 0 8px",
+                width: "100%",
+              }
+            : {
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                top: 64,
+                backdropFilter: "blur(2px)",
+                zIndex: 15,
+                paddingRight: 32,
+                position: "fixed",
+                margin: 0,
+                left: 260,
+                right: 0,
+                padding: "12px 32px",
+              }
+        }
       >
+
         <div style={{ display: "flex", flexDirection: "column" }}>
           <h1 style={{ color: textColor, margin: 0 }}>{board.title}</h1>
           {columns.length === 0 && (
@@ -436,6 +450,7 @@ const BoardDetail = ({ board, theme }) => {
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+
           {columns.length > 0 && (
             <button
               onClick={() => setShowAddModal(true)}
