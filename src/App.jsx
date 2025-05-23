@@ -4,10 +4,8 @@ import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 import HomePage from "./pages/HomePage/HomePage";
 import WelcomePage from "./pages/WelcomePage/WelcomePage";
-import LoginForm from "./components/LoginForm/LoginForm";
-import RegisterForm from "./components/RegisterForm/RegisterForm";
 import AuthPage from "./pages/AuthPage/AuthPage";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
 
 function App({ setTheme, theme }) {
   return (
@@ -18,13 +16,16 @@ function App({ setTheme, theme }) {
         <Route element={<PublicRoute restricted={true} />}>
           <Route path="/" element={<WelcomePage />} />
           <Route path="/welcome" element={<WelcomePage />} />
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegisterForm />} />
+          {/* Tek bir AuthPage ile login/register kontrolü */}
+          <Route path="/auth/:type" element={<AuthPage />} />
         </Route>
 
         {/* Private Routes */}
         <Route element={<PrivateRoute />}>
-          <Route path="/home" element={<HomePage setTheme={setTheme} theme={theme} />} />
+          <Route
+            path="/home"
+            element={<HomePage setTheme={setTheme} theme={theme} />}
+          />
         </Route>
 
         {/* Fallback Route */}
