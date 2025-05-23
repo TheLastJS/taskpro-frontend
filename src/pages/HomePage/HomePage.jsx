@@ -18,6 +18,8 @@ import BoardDetail from "../../components/BoardDetail";
 import { selectSelectedBoard } from "../../redux/board/boardSelectors";
 import { backgroundTypes } from "../../components/BoardModal";
 import scrollbar from "../../components/Sidebar.module.css";
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Layout = styled.div`
   display: flex;
@@ -43,7 +45,6 @@ const Header = styled.header`
   padding: 0 32px;
   position: sticky;
   top: 0;
-  z-index: 20;
 `;
 const Card = styled.div`
   background: ${({ theme }) => theme.helpCard};
@@ -90,8 +91,10 @@ const LogoutButton = styled.button`
 function HomePage({ setTheme, theme }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-
   const [isBoardModalOpen, setBoardModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 800);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
@@ -109,6 +112,12 @@ function HomePage({ setTheme, theme }) {
         });
     }
   }, [token, user, dispatch]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 800);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = async () => {
     await dispatch(logoutThunk());
@@ -142,7 +151,24 @@ function HomePage({ setTheme, theme }) {
           onHelp={() => setHelpOpen(true)}
           onLogout={handleLogout}
           theme={theme}
+          open={isMobile ? sidebarOpen : true}
+          setOpen={setSidebarOpen}
         />
+        {/* Mobilde sidebar açıkken overlay */}
+        {isMobile && sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.3)',
+              zIndex: 2000,
+            }}
+          />
+        )}
       </div>
       {/* Sağ ana alan: header + main */}
       <div
@@ -154,6 +180,31 @@ function HomePage({ setTheme, theme }) {
         }}
       >
         <Header>
+          {/* Hamburger butonu sadece mobilde ve sidebar kapalıyken */}
+          {isMobile && !sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              style={{
+                position: 'absolute',
+                left: 16,
+                top: 16,
+                zIndex: 3000,
+                background: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 40,
+                height: 40,
+                borderRadius: 8,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              }}
+              aria-label="Open sidebar"
+            >
+              <MenuIcon style={{ color: '#232323', fontSize: 28 }} />
+            </button>
+          )}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <FormControl
               variant="outlined"

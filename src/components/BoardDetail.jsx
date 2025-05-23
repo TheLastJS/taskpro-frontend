@@ -298,6 +298,7 @@ const BoardDetail = ({ board }) => {
   const [editCardModal, setEditCardModal] = useState({ open: false, card: null, columnId: null });
   const [deleteCardModal, setDeleteCardModal] = useState({ open: false, card: null, columnId: null });
   const [moveCardModal, setMoveCardModal] = useState({ open: false, card: null, fromColumnId: null });
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 800;
 
   const bgObj = backgroundTypes.find((bg) => bg.name === board.background);
   const bgImg = bgObj ? bgObj.img : undefined;
@@ -382,45 +383,49 @@ const BoardDetail = ({ board }) => {
   return (
     <div>
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          top: 64,
-          backdropFilter: "blur(2px)",
-          zIndex: 15,
-          paddingRight: 32,
-          position: "fixed",
-          margin: 0,
-          left: 260,
-          right: 0,
-          padding: "12px 32px",
-        }}
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+                padding: "8px 8px 0 8px",
+                width: "100%",
+              }
+            : {
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                top: 64,
+                backdropFilter: "blur(2px)",
+                zIndex: 15,
+                paddingRight: 32,
+                position: "fixed",
+                margin: 0,
+                left: 260,
+                right: 0,
+                padding: "12px 32px",
+              }
+        }
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <h1 style={{ color: "#fff", margin: 0 }}>{board.title}</h1>
-          {columns.length === 0 && (
-            <button
-              onClick={() => setShowAddModal(true)}
-              style={{
-                padding: "12px 24px",
-                background: "#232323",
-                color: "#fff",
-                border: "none",
-                borderRadius: 8,
-                fontWeight: 500,
-                fontSize: 16,
-                marginTop: 8,
-                marginBottom: 16,
-                cursor: "pointer",
-                textAlign: "left",
-              }}
-            >
-              + Add column
-            </button>
-          )}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <h1 style={{
+          color: "#fff",
+          margin: 0,
+          flex: "1 1 0",
+          minWidth: 0,
+          fontSize: "2rem",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap"
+        }}>{board.title}</h1>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          whiteSpace: "nowrap"
+        }}>
           {columns.length > 0 && (
             <button
               onClick={() => setShowAddModal(true)}
