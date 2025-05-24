@@ -21,7 +21,7 @@ function LoginForm() {
       <div className={styles.registerForm}>
         <div className={styles.navigate}>
           <NavLink
-            to="/auth/register"
+            to="/register"
             className={({ isActive }) =>
               isActive ? styles.activeTab : styles.inactiveTab
             }
@@ -29,7 +29,7 @@ function LoginForm() {
             <p>Registration</p>
           </NavLink>
           <NavLink
-            to="/auth/login"
+            to="/login"
             className={({ isActive }) =>
               isActive ? styles.activeTab : styles.inactiveTab
             }
