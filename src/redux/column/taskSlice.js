@@ -34,15 +34,33 @@ const taskSlice = createSlice({
       .addCase(require('./taskOperations').deleteTaskThunk.fulfilled, (state, action) => {
         const { columnId, taskId } = action.payload;
         if (state.tasksByColumn[columnId]) {
-          state.tasksByColumn[columnId] = state.tasksByColumn[columnId].filter(task => task._id !== taskId);
+          state.tasksByColumn[columnId] = state.tasksByColumn[columnId].filter(
+            (task) => task._id !== taskId
+          );
         }
       })
       .addCase(require('./taskOperations').updateTaskThunk.fulfilled, (state, action) => {
         const { columnId, task } = action.payload;
-        if (state.tasksByColumn[columnId]) {
-          const idx = state.tasksByColumn[columnId].findIndex(t => t._id === task._id);
-          if (idx !== -1) {
-            state.tasksByColumn[columnId][idx] = task;
+        const oldColumnId = Object.keys(state.tasksByColumn).find((colId) =>
+          state.tasksByColumn[colId]?.some((t) => t._id === task._id)
+        );
+
+        if (oldColumnId && oldColumnId !== task.column) {
+          // Eski column'dan kaldır
+          state.tasksByColumn[oldColumnId] = state.tasksByColumn[oldColumnId].filter(
+            (t) => t._id !== task._id
+          );
+
+          // Yeni column'a ekle
+          if (!state.tasksByColumn[task.column]) state.tasksByColumn[task.column] = [];
+          state.tasksByColumn[task.column].push(task);
+        } else {
+          // Aynı column'da güncelleme
+          if (state.tasksByColumn[columnId]) {
+            const idx = state.tasksByColumn[columnId].findIndex((t) => t._id === task._id);
+            if (idx !== -1) {
+              state.tasksByColumn[columnId][idx] = task;
+            }
           }
         }
       })
@@ -50,7 +68,9 @@ const taskSlice = createSlice({
         const { fromColumnId, toColumnId, task } = action.payload;
         // Remove from old column
         if (state.tasksByColumn[fromColumnId]) {
-          state.tasksByColumn[fromColumnId] = state.tasksByColumn[fromColumnId].filter(t => t._id !== task._id);
+          state.tasksByColumn[fromColumnId] = state.tasksByColumn[fromColumnId].filter(
+            (t) => t._id !== task._id
+          );
         }
         // Add to top of new column
         if (!state.tasksByColumn[toColumnId]) state.tasksByColumn[toColumnId] = [];

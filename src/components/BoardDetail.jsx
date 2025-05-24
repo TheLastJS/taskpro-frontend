@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect, useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchColumnsThunk,
   createColumnThunk,
   updateColumnThunk,
   deleteColumnThunk,
 } from "../redux/column/columnOperations.js";
-import { addTaskThunk, fetchTasksThunk, deleteTaskThunk, updateTaskThunk } from "../redux/column/taskOperations";
+import {
+  addTaskThunk,
+  fetchTasksThunk,
+  deleteTaskThunk,
+  updateTaskThunk,
+} from '../redux/column/taskOperations';
 import {
   selectColumns,
   selectColumnLoading as selectIsLoading,
@@ -23,6 +28,23 @@ import pencil from "../assets/icons/pencil.svg";
 import trash from "../assets/icons/trash.svg";
 import bell from "../assets/icons/bell-01.svg";
 import arrowRight from "../assets/icons/arrow-circle-broken-right.svg";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { reorderColumnsThunk, reorderTasksThunk } from '../redux/column/reorderThunks';
 
 const TaskCard = ({ task, columnId, onEdit, onDelete, onMove, theme }) => {
   const priorityColors = {
@@ -102,6 +124,40 @@ const TaskCard = ({ task, columnId, onEdit, onDelete, onMove, theme }) => {
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+const SortableColumn = ({ id, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.7 : 1,
+    zIndex: isDragging ? 100 : 'auto',
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+};
+
+const SortableCard = ({ id, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.7 : 1,
+    zIndex: isDragging ? 100 : 'auto',
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
     </div>
   );
 };
@@ -353,6 +409,9 @@ const BoardDetail = ({ board, theme }) => {
   const [moveCardModal, setMoveCardModal] = useState({ open: false, card: null, fromColumnId: null });
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState([]);
+  const [columnOrder, setColumnOrder] = useState([]);
+  const [tasksOrder, setTasksOrder] = useState({});
+  const [activeId, setActiveId] = useState(null);
 
   //const bgObj = backgroundTypes.find((bg) => bg.name === board.background);
   const textColor = getTextColorByBackground(board.background || '', theme);
@@ -413,6 +472,140 @@ const BoardDetail = ({ board, theme }) => {
       });
     }
   }, [columns, board?._id, dispatch]);
+
+  useEffect(() => {
+    setColumnOrder(columns.map((col) => col._id));
+    const newTasksOrder = {};
+    columns.forEach((col) => {
+      newTasksOrder[col._id] = (tasksByColumn[col._id] || []).map((task) => task._id);
+    });
+    setTasksOrder(newTasksOrder);
+  }, [columns, tasksByColumn]);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    // Eğer bir yere bırakılmadıysa (column dışına bırakıldı), hiçbir işlem yapma
+    if (!over) {
+      return; // Kartı eski yerine otomatik döndür
+    }
+
+    // Sürüklenen öğenin card mı column mu olduğunu kontrol et
+    const isDraggingCard = Object.values(tasksOrder).some((arr) => arr.includes(active.id));
+    const isDraggingColumn = columnOrder.includes(active.id);
+
+    // Eğer card sürükleniyorsa
+    if (isDraggingCard) {
+      // Hedefin geçerli olup olmadığını kontrol et (başka bir card veya column olmalı)
+      const isValidTarget =
+        Object.values(tasksOrder).some((arr) => arr.includes(over.id)) || // Başka bir card
+        columnOrder.includes(over.id); // Veya bir column
+
+      // Geçersiz hedefe bırakıldıysa hiçbir işlem yapma
+      if (!isValidTarget) {
+        return; // Kartı eski yerine otomatik döndür
+      }
+    }
+
+    // Eğer column sürükleniyorsa
+    if (isDraggingColumn) {
+      // Hedefin başka bir column olup olmadığını kontrol et
+      if (!columnOrder.includes(over.id)) {
+        return; // Column'u eski yerine otomatik döndür
+      }
+    }
+
+    // Column drag
+    if (columnOrder.includes(active.id) && columnOrder.includes(over.id)) {
+      if (active.id !== over.id) {
+        const oldIndex = columnOrder.indexOf(active.id);
+        const newIndex = columnOrder.indexOf(over.id);
+        const newOrder = arrayMove(columnOrder, oldIndex, newIndex);
+        setColumnOrder(newOrder);
+        // Backend'e yeni sıralama gönder
+        dispatch(reorderColumnsThunk({ boardId: board._id, columnOrder: newOrder }));
+      }
+    } else {
+      // Card drag
+      const fromColumnId = Object.keys(tasksOrder).find((colId) =>
+        tasksOrder[colId].includes(active.id)
+      );
+
+      // toColumnId'yi bulurken hem task'ların olduğu column'ları hem de boş column'ları kontrol et
+      let toColumnId = Object.keys(tasksOrder).find((colId) => tasksOrder[colId].includes(over.id));
+
+      // Eğer over.id bir columnId ise (boş column'a bırakıldı)
+      if (!toColumnId && columnOrder.includes(over.id)) {
+        toColumnId = over.id;
+      }
+
+      if (fromColumnId && toColumnId) {
+        if (fromColumnId === toColumnId) {
+          // Aynı kolonda kart sırası değişti
+          const oldIndex = tasksOrder[fromColumnId].indexOf(active.id);
+          const newIndex = tasksOrder[toColumnId].indexOf(over.id);
+          const newTasks = arrayMove(tasksOrder[fromColumnId], oldIndex, newIndex);
+          setTasksOrder({ ...tasksOrder, [fromColumnId]: newTasks });
+          // Backend'e yeni sıralama gönder
+          dispatch(
+            reorderTasksThunk({ boardId: board._id, columnId: fromColumnId, taskOrder: newTasks })
+          );
+        } else {
+          // Farklı kolona kart taşındı
+          const fromTasks = tasksOrder[fromColumnId].filter((id) => id !== active.id);
+
+          // Hedef column'da task var mı kontrol et
+          let toTasks;
+          if (tasksOrder[toColumnId] && tasksOrder[toColumnId].includes(over.id)) {
+            // Başka bir task'ın üzerine bırakıldı
+            const toIndex = tasksOrder[toColumnId].indexOf(over.id);
+            toTasks = [...tasksOrder[toColumnId]];
+            toTasks.splice(toIndex, 0, active.id);
+          } else {
+            // Boş column'a veya column'un en altına bırakıldı
+            toTasks = [...(tasksOrder[toColumnId] || []), active.id];
+          }
+
+          // Önce UI'ı güncelle
+          setTasksOrder({
+            ...tasksOrder,
+            [fromColumnId]: fromTasks,
+            [toColumnId]: toTasks,
+          });
+
+          // Backend'e task'ı yeni column'a taşı
+          dispatch(
+            updateTaskThunk({
+              boardId: board._id,
+              columnId: fromColumnId,
+              taskId: active.id,
+              column: toColumnId,
+            })
+          )
+            .then(() => {
+              // Task taşıma başarılı - UI zaten güncellendi, ek bir şey yapmaya gerek yok
+              console.log('Task başarıyla taşındı');
+            })
+            .catch((error) => {
+              console.error('Task taşıma hatası:', error);
+              // Hata durumunda UI'ı eski haline döndür
+              setTasksOrder({
+                ...tasksOrder,
+                [fromColumnId]: [...tasksOrder[fromColumnId]],
+                [toColumnId]: [...tasksOrder[toColumnId]],
+              });
+            });
+        }
+      }
+    }
+    setActiveId(null);
+  };
 
   const handleAddColumn = async (title) => {
     await dispatch(createColumnThunk({ boardId: board._id, title }));
@@ -476,20 +669,22 @@ const BoardDetail = ({ board, theme }) => {
 
   return (
     <div>
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        top: 64,
-        backdropFilter: "blur(2px)",
-        zIndex: 15,
-        paddingRight: 32,
-        position: "fixed",
-        margin: 0,
-        left: 260,
-        right: 0,
-        padding: "10px 32px",
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          top: 64,
+          backdropFilter: "blur(2px)",
+          zIndex: 15,
+          paddingRight: 32,
+          position: "fixed",
+          margin: 0,
+          left: 260,
+          right: 0,
+          padding: "12px 32px",
+        }}
+      >
         <div style={{ display: "flex", flexDirection: "column" }}>
           <h1 style={{ color: textColor, margin: 0 }}>{board.title}</h1>
           {columns.length === 0 && (
@@ -497,9 +692,9 @@ const BoardDetail = ({ board, theme }) => {
               onClick={() => setShowAddModal(true)}
               style={{
                 padding: "12px 24px",
-                background: buttonStyles.background,
-                color: buttonStyles.color,
-                border: buttonStyles.border || "none",
+                background: "#121212",
+                color: "#fff",
+                border: "none",
                 borderRadius: 8,
                 fontWeight: 500,
                 fontSize: 16,
@@ -507,11 +702,7 @@ const BoardDetail = ({ board, theme }) => {
                 marginBottom: 16,
                 cursor: "pointer",
                 textAlign: "left",
-                transition: "opacity 0.2s",
-                boxShadow: buttonStyles.boxShadow || "none",
               }}
-              onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               + Add column
             </button>
@@ -523,60 +714,61 @@ const BoardDetail = ({ board, theme }) => {
               onClick={() => setShowAddModal(true)}
               style={{
                 padding: "12px 24px",
-                background: buttonStyles.background,
-                color: buttonStyles.color,
-                border: buttonStyles.border || "none",
+                background: "#121212",
+                color: "#fff",
+                border: "none",
                 borderRadius: 8,
                 fontWeight: 500,
                 fontSize: 14,
                 cursor: "pointer",
                 textAlign: "left",
-                transition: "opacity 0.2s",
-                boxShadow: buttonStyles.boxShadow || "none",
               }}
-              onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               + Add another column
             </button>
           )}
-          <div 
+          <div
             style={{
               display: "flex",
               alignItems: "center",
               flexDirection: "row",
               cursor: "pointer",
             }}
-            onClick={() => setShowFilterModal(true)}
           >
-            <img src={filter} alt="Filter" style={{
-              width: 16,
-              height: 14,
-              marginRight: 4,
-              filter: textColor === '#ffffff' ? 
-                "brightness(0) saturate(100%) invert(82%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(82%) contrast(100%)" :
-                "brightness(0) saturate(100%) invert(26%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(26%) contrast(100%)",
-            }}></img>
-            <h1 style={{
-              color: textColor,
-              margin: 0,
-              marginRight: 32,
-              fontSize: "14px",
-              letterSpacing: "-0.02em",
-            }}>
+            <img
+              src={filter}
+              alt="Filter"
+              style={{
+                width: 16,
+                height: 14,
+                marginRight: 4,
+                filter: textColor === '#ffffff' ? 
+                  "brightness(0) saturate(100%) invert(82%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(82%) contrast(100%)" :
+                  "brightness(0) saturate(100%) invert(26%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(26%) contrast(100%)",
+              }}
+            ></img>
+            <h1
+              style={{
+                color: textColor,
+                margin: 0,
+                marginRight: 32,
+                fontSize: "14px",
+                letterSpacing: "-0.02em",
+              }}
+            >
               Filters
             </h1>
           </div>
         </div>
       </div>
-
+      
       {showAddModal && (
         <ColumnModal
           onClose={() => setShowAddModal(false)}
           onSubmit={handleAddColumn}
         />
       )}
-
+  
       {editColumn && (
         <EditColumnModal
           currentTitle={editColumn.title}
@@ -584,130 +776,207 @@ const BoardDetail = ({ board, theme }) => {
           onSubmit={handleUpdateColumn}
         />
       )}
-
+  
       {deleteColumn && (
         <DeleteConfirmModal
-          title={deleteColumn.title}
-          type="column"
+          columnTitle={deleteColumn.title}
           onClose={() => setDeleteColumn(null)}
           onConfirm={handleDeleteColumn}
         />
       )}
-
-      <FilterModal
-        open={showFilterModal}
-        onClose={() => setShowFilterModal(false)}
-        selectedFilters={selectedFilters}
-        onFilterChange={handleFilterChange}
-      />
-
+  
       {isLoading ? (
         <p style={{ color: "#ccc" }}>Loading columns...</p>
       ) : Array.isArray(columns) && columns.length > 0 ? (
-        <div style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 24,
-          marginTop: 32,
-          overflow: "hidden",
-          height: "calc(100vh - 138px)",
-          alignItems: "flex-start",
-        }}>
-          {columns.map((col, colIdx) => {
-            const allTasks = tasksByColumn[col._id] || [];
-            const filteredTasks = getFilteredTasks(allTasks);
-            
-            return (
-              <div key={col._id || colIdx} style={{
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
+            <div
+              style={{
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                width: "334px",
-                marginBottom: 16,
-                overflowX: "hidden",
-                height: '100%',
-              }}>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "20px",
-                  justifyContent: "space-between",
-                  borderRadius: "8px",
-                  width: "334px",
-                  height: "56px",
-                  background: columnBg,
-                }}>
-                  <span style={{ color: columnTextColor }}>{col.title}</span>
-                  <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                    <img
-                      style={{ cursor: "pointer", filter: columnIconFilter }}
-                      src={pencil}
-                      alt="pencil"
-                      onClick={() => setEditColumn({ columnId: col._id, title: col.title })}
-                    />
-                    <img
-                      style={{ cursor: "pointer", filter: columnIconFilter }}
-                      src={trash}
-                      alt="trash"
-                      onClick={() => setDeleteColumn({ columnId: col._id, title: col.title })}
-                    />
-                  </div>
-                </div>
-                <div style={{ width: '100%', marginTop: 16, height: '100%', display: 'flex', flexDirection: 'column', overflowX: 'hidden', flex: 1 }}>
-                  <div style={{ overflowY: 'auto', minHeight: 0, overflowX: 'hidden' }}>
-                    {filteredTasks.length > 0 && filteredTasks.map((task, taskIdx) => (
-                      <TaskCard
-                        key={task._id || taskIdx}
-                        task={task}
-                        columnId={col._id}
-                        onEdit={handleEditCard}
-                        onDelete={handleDeleteCard}
-                        onMove={handleMoveCard}
-                        theme={theme}
-                      />
-                    ))}
-                  </div>
-                  <button
-                    style={{
-                      width: "100%",
-                      padding: "16px 0",
-                      borderRadius: 8,
-                      background: theme === 'violet' ? '#5255BC' : "#bedbb0",
-                      color: theme === 'violet' ? '#FFFFFF' : "#161616",
-                      border: "none",
-                      fontWeight: 500,
-                      fontSize: 16,
-                      marginTop: 8,
-                      cursor: "pointer",
-                      transition: "opacity 0.2s",
-                      flexShrink: 0,
-                    }}
-                    onClick={() => setAddCardModal({ open: true, columnId: col._id })}
-                    onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-                    onMouseLeave={(e) => e.target.style.opacity = '1'}
-                  >
-                    + Add another card
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                flexDirection: "row",
+                gap: 24,
+                marginTop: 32,
+                overflow: "hidden",
+                height: "calc(100vh - 138px)",
+                alignItems: "flex-start",
+              }}
+            >
+              {columnOrder.map((columnId) => {
+                const column = columns.find((col) => col._id === columnId);
+                if (!column) return null;
+                const tasks = tasksByColumn[column._id] || [];
+                
+                return (
+                  <SortableColumn key={column._id} id={column._id}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        width: "334px",
+                        marginBottom: 16,
+                        overflowX: "hidden",
+                        height: '100%',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "20px",
+                          justifyContent: "space-between",
+                          borderRadius: "8px",
+                          width: "334px",
+                          height: "56px",
+                          background: columnBg,
+                        }}
+                      >
+                        <span style={{ color: columnTextColor }}>{column.title}</span>
+                        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                          <img
+                            style={{ cursor: "pointer", filter: columnIconFilter }}
+                            src={pencil}
+                            alt="pencil"
+                            onClick={() =>
+                              setEditColumn({ columnId: column._id, title: column.title })
+                            }
+                          />
+                          <img
+                            style={{ cursor: "pointer", filter: columnIconFilter }}
+                            src={trash}
+                            alt="trash"
+                            onClick={() =>
+                              setDeleteColumn({ columnId: column._id, title: column.title })
+                            }
+                          />
+                        </div>
+                      </div>
+                      
+                      <div style={{ width: '100%', marginTop: 16, height: '100%', display: 'flex', flexDirection: 'column', overflowX: 'hidden', flex: 1 }}>
+                        <SortableContext
+                          items={tasksOrder[column._id] || []}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, overflowX: 'hidden' }}>
+                            {(tasksOrder[column._id] || []).map((taskId) => {
+                              const task = tasks.find((t) => t._id === taskId);
+                              if (!task) return null;
+                              return (
+                                <SortableCard key={task._id} id={task._id}>
+                                  <TaskCard
+                                    task={task}
+                                    columnId={column._id}
+                                    onEdit={handleEditCard}
+                                    onDelete={handleDeleteCard}
+                                    onMove={handleMoveCard}
+                                    theme={theme}
+                                  />
+                                </SortableCard>
+                              );
+                            })}
+                          </div>
+                        </SortableContext>
+                        
+                        <button
+                          style={{
+                            width: "100%",
+                            padding: "16px 0",
+                            borderRadius: 8,
+                            background: theme === 'violet' ? '#5255BC' : "#bedbb0",
+                            color: theme === 'violet' ? '#FFFFFF' : "#151515",
+                            border: "none",
+                            fontWeight: 500,
+                            fontSize: 16,
+                            marginTop: 8,
+                            cursor: "pointer",
+                            transition: "background 0.2s",
+                            flexShrink: 0,
+                          }}
+                          onClick={() => setAddCardModal({ open: true, columnId: column._id })}
+                        >
+                          + Add another card
+                        </button>
+                      </div>
+                    </div>
+                  </SortableColumn>
+                );
+              })}
+            </div>
+          </SortableContext>
+          
+          <DragOverlay>
+            {activeId
+              ? (() => {
+                  // Eğer activeId bir column ise
+                  if (columnOrder.includes(activeId)) {
+                    const column = columns.find((col) => col._id === activeId);
+                    return column ? (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '20px',
+                          justifyContent: 'space-between',
+                          borderRadius: '8px',
+                          width: '334px',
+                          height: '56px',
+                          background: columnBg,
+                          opacity: 0.8,
+                          transform: 'rotate(5deg)',
+                          boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+                        }}
+                      >
+                        <span style={{ color: columnTextColor }}>{column.title}</span>
+                      </div>
+                    ) : null;
+                  }
+  
+                  // Eğer activeId bir task ise
+                  const columnId = Object.keys(tasksOrder).find((colId) =>
+                    tasksOrder[colId].includes(activeId)
+                  );
+                  if (columnId) {
+                    const task = (tasksByColumn[columnId] || []).find((t) => t._id === activeId);
+                    return task ? (
+                      <div
+                        style={{
+                          opacity: 0.8,
+                          transform: 'rotate(5deg)',
+                          boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+                        }}
+                      >
+                        <TaskCard task={task} columnId={columnId} theme={theme} />
+                      </div>
+                    ) : null;
+                  }
+  
+                  return null;
+                })()
+              : null}
+          </DragOverlay>
+        </DndContext>
       ) : (
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <p style={{ color: "#ccc", fontSize: 24, textAlign: "center" }}>No columns found.</p>
         </div>
       )}
-
+  
       <AddCardModal
         open={addCardModal.open}
         columnId={addCardModal.columnId}
@@ -724,6 +993,7 @@ const BoardDetail = ({ board, theme }) => {
           }));
         }}
       />
+      
       {editCardModal.open && (
         <AddCardModal
           open={editCardModal.open}
@@ -735,14 +1005,15 @@ const BoardDetail = ({ board, theme }) => {
           editMode={true}
         />
       )}
+      
       {deleteCardModal.open && (
         <DeleteConfirmModal
-          title={deleteCardModal.card?.title || ""}
-          type="card"
+          columnTitle={deleteCardModal.card?.title || ""}
           onClose={() => setDeleteCardModal({ open: false, card: null, columnId: null })}
           onConfirm={handleConfirmDeleteCard}
         />
       )}
+      
       {moveCardModal.open && (
         <MoveCardModal
           open={moveCardModal.open}
@@ -751,11 +1022,10 @@ const BoardDetail = ({ board, theme }) => {
           columns={columns}
           onClose={() => setMoveCardModal({ open: false, card: null, fromColumnId: null })}
           boardId={board._id}
-          theme={theme}
         />
       )}
     </div>
   );
-};
+}
 
 export default BoardDetail;
