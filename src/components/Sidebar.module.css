@@ -15,6 +15,11 @@
 }
 
 .scrollableList::-webkit-scrollbar-thumb {
-  background-color: #bedbb0;
+  background-color: var(--scrollbar-thumb-color, #bedbb0);
   border-radius: 4px;
+}
+
+/* Violet tema için özel scrollbar rengi */
+:root.theme-violet .scrollableList::-webkit-scrollbar-thumb {
+  background-color: #B8BCFD;
 }

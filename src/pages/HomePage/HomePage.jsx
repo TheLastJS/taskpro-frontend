@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import UserInfo from "../../components/UserInfo/UserInfo";
-import LogoutIcon from "@mui/icons-material/Logout";
-import icon from "../../assets/icon.svg";
-import helpImage from "../../assets/help-image.png";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutThunk } from "../../redux/auth/authOperations";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +7,7 @@ import axios from "axios";
 import { setUser } from "../../redux/auth/authSlice";
 import HelpModal from "../../components/HelpModal";
 
-import { Select, MenuItem, InputLabel, FormControl, Box } from "@mui/material";
+import { Select, MenuItem, InputLabel, FormControl, Box, useMediaQuery } from "@mui/material";
 import styled from "styled-components";
 import BoardModal from "../../components/BoardModal";
 import Sidebar from "../../components/Sidebar";
@@ -24,15 +21,6 @@ const Layout = styled.div`
   min-height: 100vh;
   background: ${({ theme }) => theme.background};
 `;
-const SidebarContainer = styled.aside`
-  width: 260px;
-  background: ${({ theme }) => theme.sidebar};
-  color: ${({ theme }) => theme.text};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-`;
 const Header = styled.header`
   height: 64px;
   background: ${({ theme }) => theme.header};
@@ -45,18 +33,6 @@ const Header = styled.header`
   top: 0;
   z-index: 20;
 `;
-const Card = styled.div`
-  background: ${({ theme }) => theme.helpCard};
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 24px;
-  width: 200px;
-  color: ${({ theme }) => theme.text};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-`;
 const Main = styled.main`
   flex: 1;
   display: flex;
@@ -65,26 +41,7 @@ const Main = styled.main`
   height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
-`;
-
-const BoardButton = styled.button`
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  background: ${({ theme }) => theme.accent};
-  color: #151515;
-  border: none;
-  margin-bottom: 16px;
-  font-weight: 500;
-`;
-const LogoutButton = styled.button`
-  background: none;
-  border: none;
-  color: ${({ theme }) => theme.text};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding-right: 32px;
 `;
 
 function HomePage({ setTheme, theme }) {
@@ -92,11 +49,17 @@ function HomePage({ setTheme, theme }) {
   const [helpOpen, setHelpOpen] = useState(false);
 
   const [isBoardModalOpen, setBoardModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarShouldAnimateIn, setSidebarShouldAnimateIn] = useState(false);
+  const isTabletOrMobile = useMediaQuery('(max-width:1024px)');
+  const isMobile = useMediaQuery('(max-width:600px)');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const token = useSelector((state) => state.auth.token);
   const selectedBoard = useSelector(selectSelectedBoard);
+  const sidebarRef = useRef();
 
   useEffect(() => {
     if (token && (!user || !user.name)) {
@@ -109,6 +72,28 @@ function HomePage({ setTheme, theme }) {
         });
     }
   }, [token, user, dispatch]);
+
+  useEffect(() => {
+    if (isTabletOrMobile) {
+      if (sidebarOpen) {
+        setSidebarVisible(true);
+        setSidebarShouldAnimateIn(false);
+        setTimeout(() => setSidebarShouldAnimateIn(true), 10);
+      } else {
+        setSidebarShouldAnimateIn(false);
+        const timeout = setTimeout(() => setSidebarVisible(false), 350);
+        return () => clearTimeout(timeout);
+      }
+    } else {
+      setSidebarVisible(true);
+      setSidebarShouldAnimateIn(false);
+    }
+  }, [sidebarOpen, isTabletOrMobile]);
+
+  useEffect(() => {
+    if (isTabletOrMobile && sidebarVisible && sidebarOpen) {
+    }
+  }, [sidebarVisible, sidebarOpen, isTabletOrMobile]);
 
   const handleLogout = async () => {
     await dispatch(logoutThunk());
@@ -126,24 +111,101 @@ function HomePage({ setTheme, theme }) {
 
   return (
     <Layout>
-      {/* Sidebar */}
-      <div
-        style={{
-          position: "sticky",
-          left: 0,
-          top: 0,
-          height: "100vh",
-          zIndex: 10,
-          flexShrink: 0,
-        }}
-      >
-        <Sidebar
-          onCreateBoard={() => setBoardModalOpen(true)}
-          onHelp={() => setHelpOpen(true)}
-          onLogout={handleLogout}
-          theme={theme}
-        />
-      </div>
+      {/* Hamburger ve Sidebar */}
+      {isTabletOrMobile && !sidebarOpen && (
+        <button
+          style={{
+            position: 'fixed',
+            top: 24,
+            left: 24,
+            zIndex: 2001,
+            background: 'none',
+            border: 'none',
+            fontSize: 32,
+            cursor: 'pointer',
+            color: theme === 'dark' ? '#fff' : '#232323',
+          }}
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+        >
+          {/* Hamburger icon */}
+          <span style={{ display: 'block', width: 32, height: 32 }}>
+            <svg width="32" height="32" viewBox="0 0 32 32"><rect y="6" width="32" height="4" rx="2" fill="currentColor"/><rect y="14" width="32" height="4" rx="2" fill="currentColor"/><rect y="22" width="32" height="4" rx="2" fill="currentColor"/></svg>
+          </span>
+        </button>
+      )}
+      {(isTabletOrMobile ? sidebarVisible : true) && (
+        <div
+          style={{
+            position: isTabletOrMobile ? 'fixed' : 'sticky',
+            left: 0,
+            top: 0,
+            height: '100vh',
+            zIndex: isTabletOrMobile ? 2000 : 10,
+            flexShrink: 0,
+            background: isTabletOrMobile ? 'rgba(0,0,0,0.4)' : undefined,
+            width: isTabletOrMobile ? '100vw' : undefined,
+            display: 'flex',
+            alignItems: 'flex-start',
+            transition: isTabletOrMobile ? 'background 0.3s' : undefined,
+          }}
+          onClick={isTabletOrMobile ? () => setSidebarOpen(false) : undefined}
+        >
+          {/* Slide animasyonunu sadece mobil/tablet için uygula */}
+          <div
+            style={{
+              width: isTabletOrMobile ? 0 : undefined,
+              flex: isTabletOrMobile ? '1 0 auto' : undefined,
+              display: 'flex',
+              height: '100vh',
+            }}
+          >
+            <div
+              ref={sidebarRef}
+              style={{
+                minWidth: 260,
+                maxWidth: 320,
+                width: 260,
+                height: '100vh',
+                background: theme === 'dark' ? '#232323' : theme === 'light' ? '#fff' : '#5255BC',
+                boxShadow: isTabletOrMobile ? '0 0 24px rgba(0,0,0,0.25)' : undefined,
+                position: isTabletOrMobile ? 'relative' : undefined,
+                transform: isTabletOrMobile
+                  ? (sidebarShouldAnimateIn ? 'translateX(0)' : 'translateX(-100%)')
+                  : 'none',
+                transition: isTabletOrMobile ? 'transform 0.35s cubic-bezier(.4,1.3,.5,1), box-shadow 0.3s' : undefined,
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {isTabletOrMobile && (
+                <button
+                  style={{
+                    position: 'absolute',
+                    top: 18,
+                    right: 18,
+                    background: 'none',
+                    border: 'none',
+                    fontSize: 32,
+                    color: theme === 'dark' ? '#fff' : '#232323',
+                    cursor: 'pointer',
+                    zIndex: 2002,
+                  }}
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Close sidebar"
+                >
+                  &times;
+                </button>
+              )}
+              <Sidebar
+                onCreateBoard={() => setBoardModalOpen(true)}
+                onHelp={() => setHelpOpen(true)}
+                onLogout={handleLogout}
+                theme={theme}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {/* Sağ ana alan: header + main */}
       <div
         style={{
@@ -233,7 +295,7 @@ function HomePage({ setTheme, theme }) {
                 <MenuItem value="violet">Violet</MenuItem>
               </Select>
             </FormControl>
-            {user && user.name && (
+            {user && user.name && !isMobile && (
               <span
                 style={{
                   fontWeight: 600,
@@ -328,7 +390,11 @@ function HomePage({ setTheme, theme }) {
               >
                 Before starting your project, it is essential to{" "}
                 <span
-                  style={{ color: theme === "violet" ? "#5255BC" : "#bedbb0" }}
+                  style={{ color: theme === "violet" ? "#5255BC" : "#bedbb0", cursor: 'pointer', textDecoration: 'underline' }}
+                  onClick={() => setBoardModalOpen(true)}
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setBoardModalOpen(true); }}
                 >
                   create a board
                 </span>{" "}

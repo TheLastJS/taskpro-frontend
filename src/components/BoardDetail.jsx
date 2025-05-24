@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchColumnsThunk,
@@ -10,214 +10,19 @@ import { addTaskThunk, fetchTasksThunk, deleteTaskThunk, updateTaskThunk } from 
 import {
   selectColumns,
   selectColumnLoading as selectIsLoading,
-  selectTasksByColumn,
 } from "../redux/column/columnSelectors";
 import { backgroundTypes } from "./BoardModal";
 import { getTextColorByBackground } from "../utils/getTextColorByBackground";
 import ColumnModal from "./ColumnModal";
 import EditColumnModal from "./EditColumnModal";
 import DeleteConfirmModal from "./DeleteColumnModal.jsx";
+import AddCardModal from "./AddCardModal.jsx";
+import FilterModal from "./FilterModal.jsx";
 import filter from "../assets/icons/filter.svg";
 import pencil from "../assets/icons/pencil.svg";
 import trash from "../assets/icons/trash.svg";
 import bell from "../assets/icons/bell-01.svg";
 import arrowRight from "../assets/icons/arrow-circle-broken-right.svg";
-import styles from "./UserInfo/UserInfo.module.css";
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ReplayIcon from '@mui/icons-material/Replay';
-
-const LABELS = [
-  { color: "#8FA1D0", name: "Low" },
-  { color: "#E09CB5", name: "Medium" },
-  { color: "#BEDBB0", name: "High" },
-  { color: "#5C5C5C", name: "Without" },
-];
-
-function AddCardModal({ open, onClose, onAdd, columnId, boardId, initialValues = {}, editMode = false }) {
-  const [title, setTitle] = useState(initialValues.title || "");
-  const [desc, setDesc] = useState(initialValues.description || "");
-  const [label, setLabel] = useState(initialValues.priority || "Without");
-  const [deadline, setDeadline] = useState(initialValues.deadline ? dayjs(initialValues.deadline) : dayjs());
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [touched, setTouched] = useState(false);
-  const modalRef = useRef();
-
-  useEffect(() => {
-    if (open) {
-      setTitle(initialValues.title || "");
-      setDesc(initialValues.description || "");
-      setLabel(initialValues.priority || "Without");
-      setDeadline(initialValues.deadline ? dayjs(initialValues.deadline) : dayjs());
-      setTouched(false);
-      setShowCalendar(false);
-    }
-  }, [open]);
-
-  if (!open) return null;
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    setTouched(true);
-    if (!title.trim()) return;
-    onAdd && onAdd({
-      title,
-      desc,
-      label,
-      deadline,
-      columnId,
-      _id: initialValues._id, // pass id for edit
-    });
-    onClose();
-  };
-
-  const todayStr = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
-
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()} ref={modalRef} style={{ minWidth: 370, maxWidth: 400 }}>
-        <button className={styles.closeBtn} onClick={onClose}>&times;</button>
-        <div className={styles.modalTitle} style={{ marginBottom: 0, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0 }}>
-          <span style={{ marginBottom: 18 }}>{editMode ? 'Edit card' : 'Add card'}</span>
-          {touched && !title.trim() && (
-            <span style={{ color: "#ff6b6b", fontSize: 15, fontWeight: 500, marginBottom: 10, marginTop: 2 }}>Please fill the title field</span>
-          )}
-        </div>
-        <form className={styles.formArea} onSubmit={handleAdd} autoComplete="off" style={{ marginTop: 10 }}>
-          <input
-            className={styles.inputArea}
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            onBlur={() => setTouched(true)}
-            required
-            autoFocus
-            style={touched && !title.trim() ? { border: "2px solid #ff6b6b" } : {}}
-          />
-          <textarea
-            className={styles.inputArea}
-            placeholder="Description"
-            value={desc}
-            onChange={e => setDesc(e.target.value)}
-            rows={3}
-            style={{ resize: "none", minHeight: 80 }}
-          />
-          <div style={{ margin: "8px 0 0 0", width: "100%" }}>
-            <div style={{ marginBottom: 6, fontSize: 14, color: "#fff" }}>Label color</div>
-            <div style={{ display: "flex", gap: 18, alignItems: "center" }}>
-              {LABELS.map(l => (
-                <label key={l.name} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", position: "relative" }}>
-                  <input
-                    type="radio"
-                    name="label"
-                    value={l.name}
-                    checked={label === l.name}
-                    onChange={() => setLabel(l.name)}
-                    style={{ opacity: 0, position: "absolute", width: 16, height: 16, margin: 0, left: 0, top: 0, zIndex: 2, cursor: "pointer" }}
-                  />
-                  <span style={{ width: 16, height: 16, borderRadius: "50%", background: l.color, display: "inline-block", border: label === l.name ? "2px solid #fff" : "2px solid #232323", boxSizing: "border-box", zIndex: 1 }}></span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div style={{ margin: "12px 0 0 0", width: "100%" }}>
-            <div style={{ fontSize: 14, color: "#fff", marginBottom: 4 }}>Deadline</div>
-            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="tr">
-              <DatePicker
-                value={deadline}
-                onChange={val => setDeadline(val)}
-                format="DD.MM.YYYY"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    size: 'small',
-                    sx: {
-                      background: '#232323',
-                      color: '#fff',
-                      border: '1.5px solid #bedbb0',
-                      borderRadius: '8px',
-                      '& input': { color: '#fff', fontWeight: 600, fontSize: 16, textAlign: 'left' },
-                      '& fieldset': { border: 'none' },
-                      width: '100%',
-                    },
-                    InputProps: {
-                      style: { color: '#fff' },
-                    },
-                  },
-                  openPickerButton: {
-                    sx: {
-                      color: '#bedbb0',
-                    },
-                  },
-                  popper: {
-                    sx: {
-                      zIndex: 4000,
-                      '& .MuiPaper-root': {
-                        background: '#232323',
-                        color: '#fff',
-                        borderRadius: '12px',
-                      },
-                      '& .MuiPickersDay-root': {
-                        color: '#fff',
-                        background: 'transparent',
-                        borderRadius: '50%',
-                        '&:hover': {
-                          background: '#bedbb0',
-                          color: '#232323',
-                        },
-                      },
-                      '& .Mui-selected': {
-                        background: '#bedbb0 !important',
-                        color: '#232323 !important',
-                      },
-                      '& .MuiPickersDay-today': {
-                        border: '1.5px solid #bedbb0',
-                      },
-                      '& .MuiPickersCalendarHeader-label': {
-                        color: '#fff',
-                      },
-                      '& .MuiPickersCalendarHeader-switchViewButton': {
-                        color: '#bedbb0',
-                      },
-                      '& .MuiIconButton-root': {
-                        color: '#bedbb0',
-                      },
-                      '& .MuiPickersYear-yearButton': {
-                        color: '#fff',
-                        '&.Mui-selected': {
-                          background: '#bedbb0',
-                          color: '#232323',
-                        },
-                      },
-                      '& .MuiPickersMonth-monthButton': {
-                        color: '#fff',
-                        '&.Mui-selected': {
-                          background: '#bedbb0',
-                          color: '#232323',
-                        },
-                      },
-                      '& .MuiDayCalendar-weekDayLabel': {
-                        color: '#fff',
-                        fontWeight: 500,
-                      },
-                    },
-                  },
-                }}
-              />
-            </LocalizationProvider>
-          </div>
-          <button className={styles.sendBtn} type="submit" style={{ marginTop: 18, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {editMode ? 'Save' : (<><span style={{ fontSize: 20, marginRight: 4 }}>+</span> Add</>)}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 const TaskCard = ({ task, columnId, onEdit, onDelete, onMove, theme }) => {
   const priorityColors = {
@@ -235,13 +40,10 @@ const TaskCard = ({ task, columnId, onEdit, onDelete, onMove, theme }) => {
     showBell = deadlineDate <= today;
   }
 
-  // Tema renklerine göre card arkaplanı ve yazı rengi
   const cardBg = theme === 'light' ? '#FFFFFF' : theme === 'violet' ? '#FFFFFF' : '#232323';
   const cardTextColor = theme === 'light' ? '#232323' : theme === 'violet' ? '#232323' : '#fff';
   const cardSubTextColor = theme === 'light' ? '#8B8B8B' : theme === 'violet' ? '#8B8B8B' : '#bdbdbd';
   const cardBorderColor = theme === 'light' ? '#E8E8E8' : theme === 'violet' ? '#E8E8E8' : '#393939';
-  
-  // İkon renkleri - light ve violet temada gri, dark temada beyaz
   const iconFilter = theme === 'dark' ? 'none' : 'brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(50%) contrast(100%)';
 
   return (
@@ -304,31 +106,297 @@ const TaskCard = ({ task, columnId, onEdit, onDelete, onMove, theme }) => {
   );
 };
 
+// MoveCardModal component
+function MoveCardModal({ open, card, fromColumnId, columns, onClose, boardId, theme }) {
+  const dispatch = useDispatch();
+  const [selectedColumn, setSelectedColumn] = useState(fromColumnId);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) setSelectedColumn(fromColumnId);
+  }, [open, fromColumnId]);
+
+  if (!open || !card) return null;
+
+  const handleMove = async (e) => {
+    e.preventDefault();
+    if (!selectedColumn || selectedColumn === fromColumnId) return;
+    setSaving(true);
+    await dispatch(require('../redux/column/taskOperations').moveTaskThunk({
+      boardId,
+      fromColumnId,
+      toColumnId: selectedColumn,
+      taskId: card._id,
+    }));
+    setSaving(false);
+    onClose();
+  };
+
+  // Tema bazlı stiller
+  const getThemeStyles = () => {
+    switch(theme) {
+      case 'light':
+        return {
+          overlay: {
+            background: 'rgba(0, 0, 0, 0.5)',
+          },
+          modal: {
+            background: '#FFFFFF',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+          },
+          title: {
+            color: '#161616',
+          },
+          closeButton: {
+            color: '#161616',
+          },
+          label: {
+            color: '#5C5C5C',
+          },
+          select: {
+            background: '#F6F6F6',
+            color: '#161616',
+            border: '1.5px solid #DEDEDE',
+          },
+          button: {
+            background: '#BEDBB0',
+            color: '#161616',
+          }
+        };
+      case 'violet':
+        return {
+          overlay: {
+            background: 'rgba(0, 0, 0, 0.5)',
+          },
+          modal: {
+            background: '#FCFCFC',
+            boxShadow: '0 4px 16px rgba(17, 17, 17, 0.1)',
+          },
+          title: {
+            color: '#161616',
+          },
+          closeButton: {
+            color: '#161616',
+          },
+          label: {
+            color: '#5C5C5C',
+          },
+          select: {
+            background: '#FCFCFC',
+            color: '#161616',
+            border: '1.5px solid #7B7EDE',
+          },
+          button: {
+            background: '#5255BC',
+            color: '#FFFFFF',
+          }
+        };
+      case 'dark':
+      default:
+        return {
+          overlay: {
+            background: 'rgba(0, 0, 0, 0.7)',
+          },
+          modal: {
+            background: '#181818',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+          },
+          title: {
+            color: '#FFFFFF',
+          },
+          closeButton: {
+            color: '#FFFFFF',
+          },
+          label: {
+            color: '#FFFFFF',
+          },
+          select: {
+            background: '#232323',
+            color: '#FFFFFF',
+            border: '1.5px solid #BEDBB0',
+          },
+          button: {
+            background: '#BEDBB0',
+            color: '#161616',
+          }
+        };
+    }
+  };
+
+  const themeStyles = getThemeStyles();
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: themeStyles.overlay.background,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 3000,
+    }} onClick={onClose}>
+      <div 
+        style={{
+          background: themeStyles.modal.background,
+          borderRadius: 16,
+          boxShadow: themeStyles.modal.boxShadow,
+          padding: '32px 32px 28px 32px',
+          minWidth: 340,
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+        }} 
+        onClick={e => e.stopPropagation()}
+      >
+        <button 
+          style={{
+            position: 'absolute',
+            top: 18,
+            right: 18,
+            background: 'none',
+            border: 'none',
+            color: themeStyles.closeButton.color,
+            fontSize: 28,
+            cursor: 'pointer',
+            zIndex: 10,
+            transition: 'opacity 0.2s',
+          }}
+          onClick={onClose}
+        >
+          &times;
+        </button>
+        <div 
+          style={{
+            fontSize: 18,
+            fontWeight: 600,
+            color: themeStyles.title.color,
+            marginBottom: 24,
+            textAlign: 'left',
+            width: '100%',
+          }}
+        >
+          Move card
+        </div>
+        <form onSubmit={handleMove}>
+          <div style={{ marginBottom: 18 }}>
+            <label 
+              style={{ 
+                color: themeStyles.label.color, 
+                fontSize: 15, 
+                marginBottom: 6, 
+                display: 'block' 
+              }}
+            >
+              Select column
+            </label>
+            <select
+              value={selectedColumn}
+              onChange={e => setSelectedColumn(e.target.value)}
+              style={{ 
+                width: '100%', 
+                padding: 10, 
+                borderRadius: 8, 
+                border: themeStyles.select.border, 
+                background: themeStyles.select.background, 
+                color: themeStyles.select.color, 
+                fontSize: 16 
+              }}
+            >
+              {columns.map(col => (
+                <option key={col._id} value={col._id} disabled={col._id === fromColumnId}>
+                  {col.title} {col._id === fromColumnId ? '(Current)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button 
+            style={{ 
+              borderRadius: 8,
+              width: '100%',
+              height: 49,
+              fontWeight: 600,
+              fontSize: 14,
+              textAlign: 'center',
+              color: themeStyles.button.color,
+              background: themeStyles.button.background,
+              border: 'none',
+              marginTop: 10,
+              transition: 'opacity 0.2s',
+              cursor: 'pointer',
+              opacity: (saving || selectedColumn === fromColumnId) ? 0.6 : 1,
+            }}
+            type="submit" 
+            disabled={saving || selectedColumn === fromColumnId}
+          >
+            {saving ? 'Moving...' : 'Move'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 const BoardDetail = ({ board, theme }) => {
   const dispatch = useDispatch();
   const columns = useSelector(selectColumns);
   const isLoading = useSelector(selectIsLoading);
   const tasksByColumn = useSelector(state => state.task.tasksByColumn);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editColumn, setEditColumn] = useState(null); // { columnId, title }
-  const [deleteColumn, setDeleteColumn] = useState(null); // { columnId, title }
+  const [editColumn, setEditColumn] = useState(null);
+  const [deleteColumn, setDeleteColumn] = useState(null);
   const [addCardModal, setAddCardModal] = useState({ open: false, columnId: null });
   const [editCardModal, setEditCardModal] = useState({ open: false, card: null, columnId: null });
   const [deleteCardModal, setDeleteCardModal] = useState({ open: false, card: null, columnId: null });
   const [moveCardModal, setMoveCardModal] = useState({ open: false, card: null, fromColumnId: null });
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState([]);
 
   const bgObj = backgroundTypes.find((bg) => bg.name === board.background);
-  const bgImg = bgObj ? bgObj.img : undefined;
-
-  // Board background'ına göre text rengini belirle
   const textColor = getTextColorByBackground(board.background || '', theme);
-
-  // Tema renklerine göre column arkaplanı
   const columnBg = theme === 'light' ? '#FFFFFF' : theme === 'violet' ? '#FFFFFF' : '#121212';
   const columnTextColor = theme === 'light' ? '#232323' : theme === 'violet' ? '#232323' : '#FFFFFF';
-  
-  // Column ikonları için filter
   const columnIconFilter = theme === 'dark' ? 'none' : 'brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(50%) contrast(100%)';
+
+  // Tema uyumlu buton renkleri
+  const getButtonStyles = () => {
+    switch(theme) {
+      case 'light':
+        return {
+          background: '#FFFFFF',
+          color: '#161616',
+          border: '1px solid #E8E8E8',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        };
+      case 'violet':
+        return {
+          background: '#FFFFFF',
+          color: '#161616',
+          border: '1px solid #E0E1DD',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        };
+      case 'dark':
+      default:
+        return {
+          background: '#121212',
+          color: '#FFFFFF',
+          border: 'none',
+          boxShadow: 'none'
+        };
+    }
+  };
+
+  const buttonStyles = getButtonStyles();
+
+  // Filtrelenmiş görevleri hesapla
+  const getFilteredTasks = (tasks) => {
+    if (selectedFilters.length === 0) {
+      return tasks;
+    }
+    return tasks.filter(task => selectedFilters.includes(task.priority));
+  };
 
   useEffect(() => {
     if (board?._id) {
@@ -352,22 +420,17 @@ const BoardDetail = ({ board, theme }) => {
   };
 
   const handleUpdateColumn = async (title) => {
-    await dispatch(
-      updateColumnThunk({
-        boardId: board._id,
-        columnId: editColumn.columnId,
-        title,
-      })
-    );
+    await dispatch(updateColumnThunk({
+      boardId: board._id,
+      columnId: editColumn.columnId,
+      title,
+    }));
     setEditColumn(null);
-
     dispatch(fetchColumnsThunk(board._id));
   };
 
   const handleDeleteColumn = async () => {
-    await dispatch(
-      deleteColumnThunk({ boardId: board._id, columnId: deleteColumn.columnId })
-    );
+    await dispatch(deleteColumnThunk({ columnId: deleteColumn.columnId }));
     setDeleteColumn(null);
   };
 
@@ -407,24 +470,26 @@ const BoardDetail = ({ board, theme }) => {
     setMoveCardModal({ open: true, card, fromColumnId });
   };
 
+  const handleFilterChange = (filters) => {
+    setSelectedFilters(filters);
+  };
+
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          top: 64,
-          backdropFilter: "blur(2px)",
-          zIndex: 15,
-          paddingRight: 32,
-          position: "fixed",
-          margin: 0,
-          left: 260,
-          right: 0,
-          padding: "12px 32px",
-        }}
-      >
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        top: 64,
+        backdropFilter: "blur(2px)",
+        zIndex: 15,
+        paddingRight: 32,
+        position: "fixed",
+        margin: 0,
+        left: 260,
+        right: 0,
+        padding: "10px 32px",
+      }}>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <h1 style={{ color: textColor, margin: 0 }}>{board.title}</h1>
           {columns.length === 0 && (
@@ -432,9 +497,9 @@ const BoardDetail = ({ board, theme }) => {
               onClick={() => setShowAddModal(true)}
               style={{
                 padding: "12px 24px",
-                background: "#121212",
-                color: "#fff",
-                border: "none",
+                background: buttonStyles.background,
+                color: buttonStyles.color,
+                border: buttonStyles.border || "none",
                 borderRadius: 8,
                 fontWeight: 500,
                 fontSize: 16,
@@ -442,7 +507,11 @@ const BoardDetail = ({ board, theme }) => {
                 marginBottom: 16,
                 cursor: "pointer",
                 textAlign: "left",
+                transition: "opacity 0.2s",
+                boxShadow: buttonStyles.boxShadow || "none",
               }}
+              onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               + Add column
             </button>
@@ -454,53 +523,53 @@ const BoardDetail = ({ board, theme }) => {
               onClick={() => setShowAddModal(true)}
               style={{
                 padding: "12px 24px",
-                background: "#121212",
-                color: "#fff",
-                border: "none",
+                background: buttonStyles.background,
+                color: buttonStyles.color,
+                border: buttonStyles.border || "none",
                 borderRadius: 8,
                 fontWeight: 500,
                 fontSize: 14,
                 cursor: "pointer",
                 textAlign: "left",
+                transition: "opacity 0.2s",
+                boxShadow: buttonStyles.boxShadow || "none",
               }}
+              onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               + Add another column
             </button>
           )}
-          <div
+          <div 
             style={{
               display: "flex",
               alignItems: "center",
               flexDirection: "row",
               cursor: "pointer",
             }}
+            onClick={() => setShowFilterModal(true)}
           >
-            <img
-              src={filter}
-              alt="Filter"
-              style={{
-                width: 16,
-                height: 14,
-                marginRight: 4,
-                filter: textColor === '#ffffff' ? 
-                  "brightness(0) saturate(100%) invert(82%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(82%) contrast(100%)" :
-                  "brightness(0) saturate(100%) invert(26%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(26%) contrast(100%)",
-              }}
-            ></img>
-            <h1
-              style={{
-                color: textColor,
-                margin: 0,
-                marginRight: 32,
-                fontSize: "14px",
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <img src={filter} alt="Filter" style={{
+              width: 16,
+              height: 14,
+              marginRight: 4,
+              filter: textColor === '#ffffff' ? 
+                "brightness(0) saturate(100%) invert(82%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(82%) contrast(100%)" :
+                "brightness(0) saturate(100%) invert(26%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(26%) contrast(100%)",
+            }}></img>
+            <h1 style={{
+              color: textColor,
+              margin: 0,
+              marginRight: 32,
+              fontSize: "14px",
+              letterSpacing: "-0.02em",
+            }}>
               Filters
             </h1>
           </div>
         </div>
       </div>
+
       {showAddModal && (
         <ColumnModal
           onClose={() => setShowAddModal(false)}
@@ -518,78 +587,77 @@ const BoardDetail = ({ board, theme }) => {
 
       {deleteColumn && (
         <DeleteConfirmModal
-          columnTitle={deleteColumn.title}
+          title={deleteColumn.title}
+          type="column"
           onClose={() => setDeleteColumn(null)}
           onConfirm={handleDeleteColumn}
         />
       )}
 
+      <FilterModal
+        open={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        selectedFilters={selectedFilters}
+        onFilterChange={handleFilterChange}
+      />
+
       {isLoading ? (
         <p style={{ color: "#ccc" }}>Loading columns...</p>
       ) : Array.isArray(columns) && columns.length > 0 ? (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            gap: 24,
-            marginTop: 32,
-            overflow: "hidden",
-            height: "calc(100vh - 138px)",
-            alignItems: "flex-start",
-          }}
-        >
-          {columns.map((col) => {
-            const tasks = tasksByColumn[col._id] || [];
+        <div style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 24,
+          marginTop: 32,
+          overflow: "hidden",
+          height: "calc(100vh - 138px)",
+          alignItems: "flex-start",
+        }}>
+          {columns.map((col, colIdx) => {
+            const allTasks = tasksByColumn[col._id] || [];
+            const filteredTasks = getFilteredTasks(allTasks);
+            
             return (
-              <div
-                key={col._id}
-                style={{
+              <div key={col._id || colIdx} style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "334px",
+                marginBottom: 16,
+                overflowX: "hidden",
+                height: '100%',
+              }}>
+                <div style={{
                   display: "flex",
-                  flexDirection: "column",
                   alignItems: "center",
+                  padding: "20px",
+                  justifyContent: "space-between",
+                  borderRadius: "8px",
                   width: "334px",
-                  marginBottom: 16,
-                  overflowX: "hidden",
-                  height: '100%',
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "20px",
-                    justifyContent: "space-between",
-                    borderRadius: "8px",
-                    width: "334px",
-                    height: "56px",
-                    background: columnBg,
-                  }}
-                >
+                  height: "56px",
+                  background: columnBg,
+                }}>
                   <span style={{ color: columnTextColor }}>{col.title}</span>
                   <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
                     <img
                       style={{ cursor: "pointer", filter: columnIconFilter }}
                       src={pencil}
                       alt="pencil"
-                      onClick={() =>
-                        setEditColumn({ columnId: col._id, title: col.title })
-                      }
+                      onClick={() => setEditColumn({ columnId: col._id, title: col.title })}
                     />
                     <img
                       style={{ cursor: "pointer", filter: columnIconFilter }}
                       src={trash}
                       alt="trash"
-                      onClick={() =>
-                        setDeleteColumn({ columnId: col._id, title: col.title })
-                      }
+                      onClick={() => setDeleteColumn({ columnId: col._id, title: col.title })}
                     />
                   </div>
                 </div>
                 <div style={{ width: '100%', marginTop: 16, height: '100%', display: 'flex', flexDirection: 'column', overflowX: 'hidden', flex: 1 }}>
-                  <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, overflowX: 'hidden' }}>
-                    {tasks.length > 0 && tasks.map(task => (
+                  <div style={{ overflowY: 'auto', minHeight: 0, overflowX: 'hidden' }}>
+                    {filteredTasks.length > 0 && filteredTasks.map((task, taskIdx) => (
                       <TaskCard
-                        key={task._id}
+                        key={task._id || taskIdx}
                         task={task}
                         columnId={col._id}
                         onEdit={handleEditCard}
@@ -605,16 +673,18 @@ const BoardDetail = ({ board, theme }) => {
                       padding: "16px 0",
                       borderRadius: 8,
                       background: theme === 'violet' ? '#5255BC' : "#bedbb0",
-                      color: theme === 'violet' ? '#FFFFFF' : "#151515",
+                      color: theme === 'violet' ? '#FFFFFF' : "#161616",
                       border: "none",
                       fontWeight: 500,
                       fontSize: 16,
                       marginTop: 8,
                       cursor: "pointer",
-                      transition: "background 0.2s",
+                      transition: "opacity 0.2s",
                       flexShrink: 0,
                     }}
                     onClick={() => setAddCardModal({ open: true, columnId: col._id })}
+                    onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                    onMouseLeave={(e) => e.target.style.opacity = '1'}
                   >
                     + Add another card
                   </button>
@@ -624,18 +694,16 @@ const BoardDetail = ({ board, theme }) => {
           })}
         </div>
       ) : (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
           <p style={{ color: "#ccc", fontSize: 24, textAlign: "center" }}>No columns found.</p>
         </div>
       )}
@@ -669,7 +737,8 @@ const BoardDetail = ({ board, theme }) => {
       )}
       {deleteCardModal.open && (
         <DeleteConfirmModal
-          columnTitle={deleteCardModal.card?.title || ""}
+          title={deleteCardModal.card?.title || ""}
+          type="card"
           onClose={() => setDeleteCardModal({ open: false, card: null, columnId: null })}
           onConfirm={handleConfirmDeleteCard}
         />
@@ -682,65 +751,11 @@ const BoardDetail = ({ board, theme }) => {
           columns={columns}
           onClose={() => setMoveCardModal({ open: false, card: null, fromColumnId: null })}
           boardId={board._id}
+          theme={theme}
         />
       )}
     </div>
   );
 };
-
-// MoveCardModal component
-function MoveCardModal({ open, card, fromColumnId, columns, onClose, boardId }) {
-  const dispatch = useDispatch();
-  const [selectedColumn, setSelectedColumn] = useState(fromColumnId);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (open) setSelectedColumn(fromColumnId);
-  }, [open, fromColumnId]);
-
-  if (!open || !card) return null;
-
-  const handleMove = async (e) => {
-    e.preventDefault();
-    if (!selectedColumn || selectedColumn === fromColumnId) return;
-    setSaving(true);
-    await dispatch(require('../redux/column/taskOperations').moveTaskThunk({
-      boardId,
-      fromColumnId,
-      toColumnId: selectedColumn,
-      taskId: card._id,
-    }));
-    setSaving(false);
-    onClose();
-  };
-
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ minWidth: 340 }}>
-        <button className={styles.closeBtn} onClick={onClose}>&times;</button>
-        <div className={styles.modalTitle} style={{ marginBottom: 18 }}>Move card</div>
-        <form onSubmit={handleMove}>
-          <div style={{ marginBottom: 18 }}>
-            <label style={{ color: '#fff', fontSize: 15, marginBottom: 6, display: 'block' }}>Select column</label>
-            <select
-              value={selectedColumn}
-              onChange={e => setSelectedColumn(e.target.value)}
-              style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #bedbb0', background: '#232323', color: '#fff', fontSize: 16 }}
-            >
-              {columns.map(col => (
-                <option key={col._id} value={col._id} disabled={col._id === fromColumnId}>
-                  {col.title} {col._id === fromColumnId ? '(Current)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button className={styles.sendBtn} type="submit" disabled={saving || selectedColumn === fromColumnId} style={{ width: '100%', marginTop: 8 }}>
-            {saving ? 'Moving...' : 'Move'}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 export default BoardDetail;

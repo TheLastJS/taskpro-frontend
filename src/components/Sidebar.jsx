@@ -11,9 +11,6 @@ import {
   deleteBoardThunk,
 } from "../redux/board/boardOperations";
 import { setSelectedBoard } from "../redux/board/boardSlice";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import IconButton from "@mui/material/IconButton";
 import StarIcon from "@mui/icons-material/Star";
 import WorkIcon from "@mui/icons-material/Work";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
@@ -29,6 +26,7 @@ import sidebarstyle from "../components/Sidebar.module.css";
 import pencil from "../assets/icons/pencil.svg";
 import trash from "../assets/icons/trash.svg";
 import BoardModal from "./BoardModal";
+import DeleteConfirmModal from "./DeleteColumnModal.jsx";
 
 const iconMap = {
   "icon-project": <WorkIcon fontSize="small" />,
@@ -49,6 +47,7 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editBoardModal, setEditBoardModal] = useState({ open: false, board: null });
+  const [deleteBoardModal, setDeleteBoardModal] = useState({ open: false, board: null });
 
   useEffect(() => {
     dispatch(fetchBoardsThunk());
@@ -76,9 +75,14 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
   };
 
   const handleDelete = (board) => {
-    if (window.confirm(`Delete board "${board.title}"?`)) {
-      dispatch(deleteBoardThunk(board._id));
+    setDeleteBoardModal({ open: true, board });
+  };
+
+  const handleConfirmDeleteBoard = () => {
+    if (deleteBoardModal.board) {
+      dispatch(deleteBoardThunk(deleteBoardModal.board._id));
     }
+    setDeleteBoardModal({ open: false, board: null });
   };
 
   return (
@@ -91,6 +95,9 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
           color: theme === "dark" ? "#fff" : theme === "violet" ? "#FFFFFF" : "#232323",
           padding: 24,
           minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
         }}
       >
         {/* Logo ve başlık */}
@@ -123,7 +130,7 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
               fontWeight: 400,
               margin: 0,
               marginBottom: 16,
-              color: theme === "dark" ? "#fff" : "light" ? "#232323" : "#232323",
+              color: theme === "dark" || theme === "violet" ? "#fff" : "#232323",
             }}
           >
             My boards
@@ -155,7 +162,7 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
                 width: 40,
                 height: 36,
                 borderRadius: 6,
-                background: "#bedbb0",
+                background: theme === "violet" ? "#B8BCFD" : "#bedbb0",
                 color: "#161616",
                 border: "none",
                 fontWeight: 500,
@@ -252,18 +259,6 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
                       style={{ display: "flex", gap: 2 }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {/* <IconButton size="small" onClick={() => handleEdit(board)}>
-                        <EditIcon fontSize="small" style={{ color: "#bedbb0" }} />
-                      </IconButton> */}
-                      {/* <IconButton
-                        size="small"
-                        onClick={() => handleDelete(board)}
-                      >
-                        <DeleteIcon
-                          fontSize="small"
-                          style={{ color: "#e57373" }}
-                        />
-                      </IconButton> */}
                       <div style={{ display: "flex", gap: 9.45 }}>
                         <img
                           style={{ 
@@ -293,50 +288,49 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
             )}
           </div>
         </div>
-        {/* Help Card */}
-        <div
-          style={{
-            background:
-              theme === "dark"
-                ? "#292929"
-                : theme === "light"
-                ? "#F6F6F7"
-                : "#8F92D6",
-            borderRadius: 16,
-            padding: 20,
-            width: "100%",
-            color: theme === "dark" ? "#fff" : "#232323",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            marginBottom: 24,
-          }}
-        >
-          <img src={helpImage} alt="Help" style={{ marginBottom: 8 }} />
-          <div style={{ fontSize: 15, textAlign: "center", marginBottom: 12 }}>
-            If you need help with{" "}
-            <span style={{ color: "#BEDBB0" }}>TaskPro</span>, check out our
-            support resources or reach out to our customer support team.
-          </div>
-          <button
-            style={{
-              background: "none",
-              border: `1px solid ${theme === "violet" ? "#5255BC" : "#BEDBB0"}`,
-              color: theme === "violet" ? "#5255BC" : "#BEDBB0",
-              borderRadius: 8,
-              padding: "6px 16px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontSize: 14,
-            }}
-            onClick={onHelp}
-          >
-            Need help?
-          </button>
-        </div>
-        {/* Logout Button */}
+        {/* Help Card ve Logout Button alanını saran div */}
         <div style={{ marginTop: "auto", width: "100%" }}>
+          <div
+            style={{
+              background:
+                theme === "dark"
+                  ? "#292929"
+                  : theme === "light"
+                  ? "#F6F6F7"
+                  : "#8F92D6",
+              borderRadius: 16,
+              padding: 20,
+              width: "100%",
+              color: theme === "dark" ? "#fff" : "#232323",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              marginBottom: 24,
+            }}
+          >
+            <img src={helpImage} alt="Help" style={{ marginBottom: 8 }} />
+            <div style={{ fontSize: 15, textAlign: "center", marginBottom: 12 }}>
+              If you need help with{" "}
+              <span style={{ color: "#BEDBB0" }}>TaskPro</span>, check out our
+              support resources or reach out to our customer support team.
+            </div>
+            <button
+              style={{
+                background: "none",
+                border: `1px solid ${theme === "violet" ? "#5255BC" : "#BEDBB0"}`,
+                color: theme === "violet" ? "#5255BC" : "#BEDBB0",
+                borderRadius: 8,
+                padding: "6px 16px",
+                fontWeight: 500,
+                cursor: "pointer",
+                fontSize: 14,
+              }}
+              onClick={onHelp}
+            >
+              Need help?
+            </button>
+          </div>
           <button
             style={{
               background: "none",
@@ -367,6 +361,14 @@ const Sidebar = ({ onCreateBoard, onHelp, onLogout, theme = "dark" }) => {
           onClose={() => setEditBoardModal({ open: false, board: null })}
           editBoard={true}
           initialBoard={editBoardModal.board}
+        />
+      )}
+      {deleteBoardModal.open && (
+        <DeleteConfirmModal
+          title={deleteBoardModal.board?.title || ""}
+          type="board"
+          onClose={() => setDeleteBoardModal({ open: false, board: null })}
+          onConfirm={handleConfirmDeleteBoard}
         />
       )}
     </>

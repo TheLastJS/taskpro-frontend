@@ -4,7 +4,6 @@ import styles from "./LoginForm.module.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { userLoginSchema } from "../../schemas/userLoginSchema";
-import axios from "axios";
 import { useDispatch } from "react-redux";
 import { loginThunk } from "../../redux/auth/authOperations";
 
