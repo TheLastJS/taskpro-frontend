@@ -354,7 +354,7 @@ const BoardDetail = ({ board, theme }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState([]);
 
-  const bgObj = backgroundTypes.find((bg) => bg.name === board.background);
+  //const bgObj = backgroundTypes.find((bg) => bg.name === board.background);
   const textColor = getTextColorByBackground(board.background || '', theme);
   const columnBg = theme === 'light' ? '#FFFFFF' : theme === 'violet' ? '#FFFFFF' : '#121212';
   const columnTextColor = theme === 'light' ? '#232323' : theme === 'violet' ? '#232323' : '#FFFFFF';
@@ -430,7 +430,7 @@ const BoardDetail = ({ board, theme }) => {
   };
 
   const handleDeleteColumn = async () => {
-    await dispatch(deleteColumnThunk({ columnId: deleteColumn.columnId }));
+    await dispatch(deleteColumnThunk({ boardId: board._id, columnId: deleteColumn.columnId }));
     setDeleteColumn(null);
   };
 

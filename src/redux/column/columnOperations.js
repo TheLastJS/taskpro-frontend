@@ -59,9 +59,9 @@ export const updateColumnThunk = createAsyncThunk(
 
 export const deleteColumnThunk = createAsyncThunk(
   "column/deleteColumn",
-  async ({ columnId }, thunkAPI) => {
+  async ({ boardId, columnId }, thunkAPI) => {
     try {
-      await axios.delete(`/columns/${columnId}`);
+      await axios.delete(`/boards/${boardId}/columns/${columnId}`);
       return columnId;
     } catch (err) {
       console.error("Delete column error:", err);
