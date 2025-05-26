@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchColumnsThunk,
@@ -16,7 +16,6 @@ import {
   selectColumns,
   selectColumnLoading as selectIsLoading,
 } from "../redux/column/columnSelectors";
-import { backgroundTypes } from "./BoardModal";
 import { getTextColorByBackground } from "../utils/getTextColorByBackground";
 import ColumnModal from "./ColumnModal";
 import EditColumnModal from "./EditColumnModal";
@@ -419,39 +418,9 @@ const BoardDetail = ({ board, theme }) => {
   const columnTextColor = theme === 'light' ? '#232323' : theme === 'violet' ? '#232323' : '#FFFFFF';
   const columnIconFilter = theme === 'dark' ? 'none' : 'brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(50%) contrast(100%)';
 
-  // Tema uyumlu buton renkleri
-  const getButtonStyles = () => {
-    switch(theme) {
-      case 'light':
-        return {
-          background: '#FFFFFF',
-          color: '#161616',
-          border: '1px solid #E8E8E8',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        };
-      case 'violet':
-        return {
-          background: '#FFFFFF',
-          color: '#161616',
-          border: '1px solid #E0E1DD',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        };
-      case 'dark':
-      default:
-        return {
-          background: '#121212',
-          color: '#FFFFFF',
-          border: 'none',
-          boxShadow: 'none'
-        };
-    }
-  };
-
-  const buttonStyles = getButtonStyles();
-
   // Filtrelenmiş görevleri hesapla
   const getFilteredTasks = (tasks) => {
-    if (selectedFilters.length === 0) {
+    if (!selectedFilters || selectedFilters.length === 0) {
       return tasks;
     }
     return tasks.filter(task => selectedFilters.includes(task.priority));
@@ -734,6 +703,7 @@ const BoardDetail = ({ board, theme }) => {
               flexDirection: "row",
               cursor: "pointer",
             }}
+            onClick={() => setShowFilterModal(true)}
           >
             <img
               src={filter}
@@ -810,6 +780,7 @@ const BoardDetail = ({ board, theme }) => {
                 const column = columns.find((col) => col._id === columnId);
                 if (!column) return null;
                 const tasks = tasksByColumn[column._id] || [];
+                const filteredTasks = getFilteredTasks(tasks);
                 
                 return (
                   <SortableColumn key={column._id} id={column._id}>
@@ -864,7 +835,7 @@ const BoardDetail = ({ board, theme }) => {
                         >
                           <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, overflowX: 'hidden' }}>
                             {(tasksOrder[column._id] || []).map((taskId) => {
-                              const task = tasks.find((t) => t._id === taskId);
+                              const task = filteredTasks.find((t) => t._id === taskId);
                               if (!task) return null;
                               return (
                                 <SortableCard key={task._id} id={task._id}>
@@ -1022,6 +993,15 @@ const BoardDetail = ({ board, theme }) => {
           columns={columns}
           onClose={() => setMoveCardModal({ open: false, card: null, fromColumnId: null })}
           boardId={board._id}
+        />
+      )}
+
+      {showFilterModal && (
+        <FilterModal
+          open={showFilterModal}
+          onClose={() => setShowFilterModal(false)}
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
         />
       )}
     </div>
