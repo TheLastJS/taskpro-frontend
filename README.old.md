@@ -1,2 +1,0 @@
-# taskpro-frontend
-frontend service
